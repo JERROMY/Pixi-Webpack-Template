@@ -1,10 +1,10 @@
-import './container-3d.scss'
+import './container-2d.scss'
 
-class Container3D {
+class Container2D {
     render() {
         const container = document.createElement('div')
-        container.id = "container-3d"
-        container.classList.add( 'container-3d' )
+        container.id = "container-2d"
+        container.classList.add( 'container-2d' )
         container.width = 400
         container.height = 400
         const body = document.querySelector( 'body' )
@@ -12,4 +12,4 @@ class Container3D {
     }
 }
 
-export default Container3D
+export default Container2D

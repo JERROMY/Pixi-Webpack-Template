@@ -21,7 +21,7 @@ module.exports = {
 
     entry: {
         'index':'./src/index.js',
-        'three-data':'./src/three-data.js',
+        'pixi-data':'./src/pixi-data.js',
     },
     output: {
         filename: '[name].[contenthash].js',
@@ -29,6 +29,7 @@ module.exports = {
         publicPath: '',
         //assetModuleFilename: 'images/[hash][ext][query]'
     },
+    devtool: 'inline-source-map',
     mode: 'production',
     optimization: {
         splitChunks: {
@@ -40,12 +41,11 @@ module.exports = {
         rules:[
             {
                 test: /\.(png|jpg)$/,
-                type: 'asset',
-                parser: {
-                    dataUrlCondition: {
-                        maxSize: 3 * 1024,
-                    }
-                }
+                type: 'asset/resource',
+                generator:
+                {
+                    filename: 'images/[hash][ext]'
+                },
             },
             {
                 test:/\.txt/,
@@ -98,9 +98,9 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            title: 'Three.js 3D Web Template',
+            title: 'Pixi 2D Web Template',
             // template: 'src/page-template.hbs',
-            description: 'Test 3D Template',
+            description: 'Test 2D Template',
             minify: true,
         }),
     ]
