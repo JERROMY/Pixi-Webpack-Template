@@ -28,6 +28,7 @@ export class Utils{
             //console.log(url)
 
             if( parent.qrcodeSp ){
+                parent.qrcodeSp.off( 'pointerdown' )
                 parent.removeChild( parent.qrcodeSp )
                 parent.qrcodeSp = null
             } 
@@ -38,8 +39,7 @@ export class Utils{
             qrcodeSp.width = qrCodeW
             qrcodeSp.height = qrCodeH
             parent.addChild( qrcodeSp )
-            parent.qrcodeSp = qrcodeSp
-            parent.setQRCodePosition()
+            parent.setQRCodePosition( qrcodeSp )
             //console.log( qrcodeTex )
         })
         .catch(err => {

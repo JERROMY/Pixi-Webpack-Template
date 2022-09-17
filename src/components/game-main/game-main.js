@@ -119,16 +119,17 @@ export class GameMain extends PIXI.Container{
         this.eneTickCount = 0
         this.eneTickMax = 60
 
-
-        //Start Page
-        this.startPage = new StartPage(this.screenID, this.resources, this.sizes)
-        this.addChild( this.startPage )
-
-
-
         this.eneDelegate = {
             onEneRemoved: self.onEneRemoved,
-          }
+        }
+
+        this.startPageDelegate = {
+            onStartGameClick: self.onStartGameClick,
+        }
+
+        //Start Page
+        this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.startPageDelegate)
+        this.addChild( this.startPage )
     }
 
     initObj(){
@@ -170,6 +171,10 @@ export class GameMain extends PIXI.Container{
 
     onQRCodeFadeOut(pObj){
         pObj.startCountReady()
+    }
+
+    onStartGameClick(){
+        console.log( "Start Game Click" )
     }
 
     //Count Ready
@@ -301,7 +306,7 @@ export class GameMain extends PIXI.Container{
 
 
 class StartPage extends PIXI.Container {
-    constructor(screenID, resources, sizes){
+    constructor(screenID, resources, sizes, delegate){
         
         super()
 
@@ -316,6 +321,10 @@ class StartPage extends PIXI.Container {
         this.bottomBg.beginFill(0xffffff)
         this.bottomBg.drawRect(-this.gW/2, -this.gH/2, this.gW, this.gH)
         this.addChild( this.bottomBg )
+        this.bottomBg.interactive = true
+        this.bottomBg.buttonMode = true
+        this.bottomBg.on( 'pointerdown', this.onBgClick )
+
         //this.bottomBg.alpha = 0
 
 
@@ -328,7 +337,7 @@ class StartPage extends PIXI.Container {
 
         this.logo = new PIXI.Sprite( this.resources["GameLogo"].texture )
         this.logo.anchor.set( 0.5 )
-        this.logo.scale.set( 0.25 )
+        this.logo.scale.set( 0.0 )
         this.logo.position.y -= 260
         this.addChild( this.logo )
 
@@ -336,6 +345,7 @@ class StartPage extends PIXI.Container {
         this.monsterSp.anchor.set( 0.5 )
         this.monsterSp.position.y = 0
         this.monsterSp.ty = 220
+        this.monsterSp.alpha = 0;
         this.monsterSp.position.x -= 11
         this.monsterSp.scale.set( 0.9 )
         this.addChild( this.monsterSp )
@@ -343,7 +353,7 @@ class StartPage extends PIXI.Container {
         //QRCode
         this.randomCode = "1234";
         this.qrcodeSp;
-        Utils.createQRCode(this.randomCode, this)
+        
 
         //Start Button
         this.startBtn = new PIXI.Sprite( this.resources["GameStartBtn"].texture )
@@ -351,6 +361,9 @@ class StartPage extends PIXI.Container {
         this.startBtn.position.y = 190
         this.startBtn.ty = 190 + 220
         this.startBtn.alpha = 0
+        this.startBtn.visible = false
+        this.startBtn.interactive = true
+        this.startBtn.buttonMode = true
         this.addChild( this.startBtn )
 
         this.playerTxt = new PIXI.BitmapText('PLAYER 1', { fontName: 'GameFont', fontSize: 55, align: 'center' })
@@ -358,36 +371,144 @@ class StartPage extends PIXI.Container {
         this.playerTxt.position.y -= 110
         this.playerTxt.tint = 0xFFFF00
         this.playerTxt.alpha = 0
+        this.playerTxt.text = `PLAYER ${ this.screenID }`
         this.addChild( this.playerTxt )
 
-        this.t = gsap.timeline()
+        this.t1;
+        this.t2;
+        this.aniTitle;
+        this.aniPlayerTxt;
+        this.aniStartBtn;
+
+        this.delegate = delegate;
+
+        
 
     }
 
-    setQRCodePosition(){
+    onBgClick(){
+        console.log('bg click')
+        this.parent.startCreateQRCode()
+    }
+
+    startCreateQRCode(){
+        const rndCode = Math.floor( ( Math.random() * 10000 ) ).toString()
+        this.randomCode = rndCode
+        Utils.createQRCode(this.randomCode, this)
+    }
+
+    setQRCodePosition( qrcodeSp ){
+
+
+        this.qrcodeSp = qrcodeSp
+
         this.qrcodeSp.position.y = this.gH/2 - this.qrcodeSp.height/2 - 70
         this.qrcodeSp.visible = true
         this.qrcodeSp.interactive = true
         this.qrcodeSp.buttonMode = true
-        this.qrcodeSp.on('pointerdown', this.onQRCodeClick)
+        this.qrcodeSp.alpha = 0;
+        
+        
+
+        this.startTransitionIn()
+
     }
 
     onQRCodeClick(){
         const pObj = this.parent
-        console.log(pObj);
 
-
-
-
-
-        //gsap.to( this, {alpha: 0, duration: 0.6, ease: "cubic.in", onComplete: pObj.onQRCodeFadeOut, onCompleteParams: [pObj]})
-    }
-
-    startTransitionIn(){
+        this.off( 'pointerdown' )
+        pObj.startGameTransitionIn();
 
     }
 
     onQRCodeFadeOut(pObj){
         //pObj.startCountReady()
+    }
+
+    startTransitionIn(){
+
+        if(this.aniTitle){
+            this.aniTitle.kill()
+            this.aniTitle = null
+        }
+
+        if(this.aniPlayerTxt){
+            this.aniPlayerTxt.kill()
+            this.aniPlayerTxt = null
+        }
+
+        if(this.aniStartBtn){
+            this.aniStartBtn.kill()
+            this.aniStartBtn = null
+        }
+        
+        this.qrcodeSp.visible = true
+        this.startBtn.position.y = 190
+        this.monsterSp.position.y = 0
+        this.startBtn.alpha = 0
+        this.startBtn.visible = false
+        this.startBtn.off( 'pointerdown' )
+        this.playerTxt.alpha = 0
+        
+        this.bg.alpha = 0
+        this.logo.scale.set( 0 )
+        this.monsterSp.alpha = 0
+
+        this.t1 = gsap.timeline( { onComplete: this.onTransitionInComplete, onCompleteParams: [ this ]} )
+        this.t1.to(this.bg, { alpha: 1, duration:0.6, ease: "cubic.in" })
+               .to(this.logo.scale, { x: 0.25, y: 0.25, duration:0.8, ease: "back.out"}, "-=0.3")
+               .to(this.monsterSp, { alpha: 1.0, duration:0.8, ease: "back.out"}, "-=0.6")
+               .to(this.qrcodeSp, { alpha: 1.0, duration:0.8, ease: "back.out"}, "-=0.8")
+               
+               
+    }
+
+    onStartGameClick(){
+        //console.log("Start Game Click");
+        this.parent.delegate.onStartGameClick()
+        //this.off( 'pointerdown' )
+    }
+
+    startGameTransitionIn(){
+
+        this.startBtn.visible = true
+        this.t2 = gsap.timeline( { onComplete: this.onStartGameTransitionInComplete, onCompleteParams: [ this ]} )
+        this.t2.to(this.qrcodeSp, { alpha: 0, duration:0.8, ease: "Cubic.out"})
+                .to(this.startBtn, { alpha: 1, duration:0.8, ease: "Cubic.out"}, "-=0.5")
+                .to(this.startBtn, { y:this.startBtn.ty, duration:0.8, ease: "Cubic.out"}, "-=0.5")
+                .to(this.monsterSp, { y:this.monsterSp.ty, duration:0.8, ease: "Cubic.out"}, "-=0.8")
+                .to(this.playerTxt, { alpha: 1, duration:0.8, ease: "Cubic.out"}, "-=0.4")
+        
+
+    }
+
+    startLogoAnimation(){
+        this.aniTitle = gsap.to( this.logo.scale, { x: 0.26, y: 0.26, yoyo: true, repeat: -1, ease: "cube.easeinout", duration:0.6 } )
+    }
+
+    startPlayerTxtAnimation(){
+        this.aniPlayerTxt = gsap.to( this.playerTxt, { alpha:0, yoyo: true, repeat: -1, ease: "cube.easeinout", duration:1.2 } )
+        this.aniStartBtn = gsap.to( this.startBtn.scale, { x: 1.05, y: 1.05, yoyo: true, repeat: -1, ease: "cube.easeinout", duration:0.6 } )
+    }
+
+    onStartGameTransitionInComplete( pObj ){
+
+        pObj.qrcodeSp.visible = false
+        pObj.initStartBtnEvent()
+        pObj.startPlayerTxtAnimation()
+    }
+
+    onTransitionInComplete( pObj ){
+        pObj.startLogoAnimation()
+        pObj.initQRCodeEvent()
+    }
+
+    initStartBtnEvent(){
+        this.startBtn.on( 'pointerdown', this.onStartGameClick )
+    }
+
+    initQRCodeEvent(){
+        this.qrcodeSp.on( 'pointerdown', this.onQRCodeClick )
     }
 }
