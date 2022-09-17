@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js'
 //Pixi Assets
 
 const images = {};
-const context = require.context('./images', true, /\.(png|jpe?g|svg)$/);
+const context = require.context('./images', true, /\.(png|jpe?g|svg|fnt)$/);
 //console.log(images);
 
 context.keys().forEach(( filename )=>{
@@ -24,7 +24,7 @@ class AssetsLoader {
     constructor(delegate, loadingTxt) {
 
         this.loader = new PIXI.Loader()
-        this.loadingTxt = loadingTxt;
+        this.loadingTxt = loadingTxt
         this.resources = this.resources
         this.loadIndex = 0
         
@@ -96,6 +96,7 @@ class AssetsLoader {
             console.log(l);
             console.log(r);
             //console.log();
+            this.isLoadingReady = true;
             this.resources = r;
             this.delegate.onLoadFinish();
         })

@@ -40,7 +40,7 @@ module.exports = {
     module: {
         rules:[
             {
-                test: /\.(png|jpg)$/,
+                test: /\.(png|jpg|fnt)$/,
                 type: 'asset/resource',
                 generator:
                 {

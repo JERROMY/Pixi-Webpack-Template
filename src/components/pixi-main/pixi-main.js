@@ -1,7 +1,11 @@
 
 import * as PIXI from 'pixi.js'
 import AssetsLoader from '../../assetsLoader'
+
 import gsap from "gsap"
+import CustomEase from 'gsap/CustomEase'
+
+import { GameMain } from '../game-main/game-main'
 
 
 class PixiMain {
@@ -9,8 +13,8 @@ class PixiMain {
     App_Width = 400
     App_Height = 300
     
-    baseBgW = 720
-    baseBgH = 1280
+    baseBgW = 481
+    baseBgH = 1080
 
     canvasContainer
     app
@@ -22,6 +26,8 @@ class PixiMain {
     gameStages = []
 
     constructor( pixiData ){
+
+        gsap.registerPlugin(CustomEase)
 
         this.pixiData = pixiData
         console.log("Pixi Ready")
@@ -72,7 +78,7 @@ class PixiMain {
         
         //$('#canvas-container').append();
 
-        this.app.ticker.add( this.animate )
+        this.app.ticker.add( this.animate.bind(this) )
     }
 
     initEvent() {
@@ -85,7 +91,7 @@ class PixiMain {
             onLoadFinish: self.onLoadFinish
         }
 
-        this.assetsLoader = new AssetsLoader( this.alDelegate, this.loadingTxt );
+        this.assetsLoader = new AssetsLoader( this.alDelegate, this.loadingTxt )
         this.assetsLoader.startLoadAssets()
 
         window.addEventListener( 'resize', this.onWindowResize.bind( this ) )
@@ -105,7 +111,7 @@ class PixiMain {
 
         // Sprite Usage Example
         console.log("Loaded Finish 2");
-        let tween = gsap.to(this.loadingTxt, {alpha: 0, duration: 0.8, delay:0, ease: "circ.in", onComplete: this.onPercentageTxtFadeOut, onCompleteParams: [ this.loadingTxt ]})
+        let tween = gsap.to(this.loadingTxt, {alpha: 0, duration: 0.8, delay:0, ease: "circ.in", onComplete: this.onPercentageTxtFadeOut, onCompleteParams: [ this.loadingTxt, this ]})
       
         // let sprite = new PIXI.Sprite(resources.ball.texture);
         // stage.addChild(sprite);
@@ -118,23 +124,46 @@ class PixiMain {
       
     }
 
-    onPercentageTxtFadeOut( obj ){
+    onPercentageTxtFadeOut( obj, gameMain ){
         obj.visible = false
         //this.assetsLoader.isLoadingReady = true;
         console.log("Loading Complete!");
       
-        //initGameObj();
+        gameMain.initGameObj()
     }
+
+    initGameObj(){
+        const game1 = new GameMain(1, this.assetsLoader.resources)
+        this.stage.addChild(game1)
+
+        this.gameStages.push(game1)
+
+        // const game2 = new GameMain(2, this.assetsLoader.resources)
+        // this.stage.addChild(game2)
+
+        // this.gameStages.push(game2)
+
+
+        this.resizeGame()
+
+    }
+
+
 
     animate(delta) {
 
         //console.log( delta );
+        //console.log( this );
 
         if(this.assetsLoader){
-          if( this.assetsLoader.isLoadingReady ){
-            const deltaTime = delta / this.app.ticker.FPS
-            updateGame(deltaTime)
-          }
+
+            //console.log( this.assetsLoader.isLoadingReady );
+            //this.assetsLoader.isLoadingReady;
+
+            if( this.assetsLoader.isLoadingReady ){
+                const deltaTime = delta / this.app.ticker.FPS
+                this.updateGame(deltaTime)
+            }
         }
         
         
@@ -148,7 +177,18 @@ class PixiMain {
 
     updateGame( deltaTime ){
 
-    
+        
+
+        let gameStageCount = this.gameStages.length;
+        if( gameStageCount > 0 ){
+            for(let i = 0 ; i < gameStageCount ; i++){
+            const gameStage = this.gameStages[i];
+            if(gameStage.phase == "START"){
+                gameStage.updateGame( deltaTime );
+            }
+            }
+            
+        }
 
     }
 
@@ -176,7 +216,7 @@ class PixiMain {
     resizeGame(){
   
         const gameStageCount = this.gameStages.length
-        //console.log(`Stage Count: ${ gameStageCount }`);
+        console.log(`Stage Count: ${ gameStageCount }`);
       
         const spaceW = 35
         let totalGameW = 0
@@ -195,7 +235,7 @@ class PixiMain {
           totalGameW += spaceTotal
       
           for(let i = 0 ; i < gameStageCount ; i++){
-            const gameStage = gameStages[i]
+            const gameStage = this.gameStages[i]
             gameStage.position.x -= totalGameW/2
             gameStage.initObj()
             //gameStage.startCountReady();

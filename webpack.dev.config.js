@@ -45,11 +45,11 @@ module.exports = {
     module: {
         rules:[
             {
-                test: /\.(png|jpg)$/,
+                test: /\.(png|jpg|fnt)$/,
                 type: 'asset/resource',
                 generator:
                 {
-                    filename: 'images/[hash][ext]'
+                    filename: 'images/[name][ext]'
                 },
                 // parser: {
                 //     dataUrlCondition: {
