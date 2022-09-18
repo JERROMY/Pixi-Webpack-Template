@@ -52,6 +52,24 @@ export class Utils{
       
     }
 
+    static zeroPad(num, places) {
+        var zero = places - num.toString().length + 1;
+        return Array(+(zero > 0 && zero)).join("0") + num;
+    }
+
+    static degrees_to_radians(degrees)
+    {
+        var pi = Math.PI;
+        return degrees * (pi/180);
+    }
+
+    static radians_to_degrees(radians)
+    {
+        var pi = Math.PI;
+        return radians * (180/pi);
+    }
+      
+
     static getMobileOperatingSystem() {
         var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 

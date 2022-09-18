@@ -182,10 +182,12 @@ class PixiMain {
         let gameStageCount = this.gameStages.length;
         if( gameStageCount > 0 ){
             for(let i = 0 ; i < gameStageCount ; i++){
-            const gameStage = this.gameStages[i];
-            if(gameStage.phase == "START"){
-                gameStage.updateGame( deltaTime );
-            }
+                const gameStage = this.gameStages[i];
+                if(gameStage.phase == "START"){
+                    gameStage.updateGame( deltaTime );
+                }else{
+                    //gameStage.updateGame2( deltaTime );
+                }
             }
             
         }
