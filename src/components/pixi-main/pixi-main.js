@@ -186,7 +186,7 @@ class PixiMain {
                 if(gameStage.phase == "START"){
                     gameStage.updateGame( deltaTime );
                 }else{
-                    //gameStage.updateGame2( deltaTime );
+                    gameStage.updateGame2( deltaTime );
                 }
             }
             

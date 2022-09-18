@@ -7,6 +7,8 @@ import CustomEase from 'gsap/CustomEase'
 import * as PIXI from 'pixi.js'
 import { StartPage } from './start-page'
 import { GameScore } from './game-score'
+import { GameReady } from './game-ready'
+import { GameBgMove } from './game-bg-move'
 import { Char } from './char-main'
 import { Ene } from './ene-main'
 
@@ -33,6 +35,22 @@ export class GameMain extends PIXI.Container{
         //console.log(`G W: ${ this.gW } G H: ${ this.gH }`);
         this.addChild( this.bg )
 
+        //Delegate
+
+        this.eneDelegate = {
+            onEneRemoved: self.onEneRemoved,
+        }
+
+        this.pageDelegate = {
+            onPageTransitionIn: self.onPageTransitionIn,
+            onPageTransitionOut: self.onPageTransitionOut,
+        }
+
+        this.gameReadyDelegate = {
+            onReadyCountFinish: self.onReadyCountFinish,
+        }
+        //Delegate
+
         this.ball = new PIXI.Sprite( this.resources["Ball"].texture )
         this.ball.anchor.x = this.ball.anchor.y = 0.5
         
@@ -51,20 +69,9 @@ export class GameMain extends PIXI.Container{
         this.addChild( this.maskGraphic )
         this.mask = this.maskGraphic
 
-        //Count Ready
-        this.readyCountSec = 3
-        this.readyCounterSp = new PIXI.Sprite( this.resources["Ball"].texture )
-        this.addChild( this.readyCounterSp )
-        this.readyCounterSp.anchor.x = this.readyCounterSp.anchor.y = 0.5
-        this.readyCounterSp.position.x = this.gW / 2
-        this.readyCounterSp.position.y = this.gH / 2
-        this.readyCountTween
-        this.readyCountStepTween
-        //Count Ready
 
         //Count Second
-
-        this.totalTime = 30;
+        this.totalTime = 30
         
         this.countingTxt = new PIXI.Text(this.totalTime.toString(), { fontFamily: 'Arial', fontSize: 10, fontWeight: 'bold', fill: '#000000', align: 'center', stroke: '#FFFFFF', strokeThickness: 3 })
         this.countingTxt.anchor.set(0.5)
@@ -76,9 +83,10 @@ export class GameMain extends PIXI.Container{
         
 
         this.phase = "READY"
-
-
         //Count Second
+
+        this.gameBgMove = new GameBgMove( this.screenID, this.resources, this.sizes, null )
+        this.addChild( this.gameBgMove )
 
         
         //Char
@@ -95,9 +103,16 @@ export class GameMain extends PIXI.Container{
 
         //Score
 
+        
+
         this.score = 0
         this.gameScore = new GameScore(this.screenID, this.resources, this.sizes, null)
         this.addChild( this.gameScore )
+
+        //Count Ready
+        this.gameReady = new GameReady( this.screenID, this.resources, this.sizes, this.gameReadyDelegate)
+        this.addChild( this.gameReady )
+        //Count Ready
 
 
         //Game End
@@ -117,14 +132,7 @@ export class GameMain extends PIXI.Container{
         this.eneTickCount = 0
         this.eneTickMax = 60
 
-        this.eneDelegate = {
-            onEneRemoved: self.onEneRemoved,
-        }
-
-        this.pageDelegate = {
-            onPageTransitionIn: self.onPageTransitionIn,
-            onPageTransitionOut: self.onPageTransitionOut,
-        }
+        
 
         //Start Page
         //this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.pageDelegate)
@@ -191,29 +199,16 @@ export class GameMain extends PIXI.Container{
         }
     }
 
-    //Count Ready
-    startCountReady(){
-        this.readyCountTween = gsap.to( this.readyCounterSp.scale, {x: 0, y: 0, duration: 1.0, delay:0, repeatDelay: 0.4, onRepeat: this.onReadyCountStep, onRepeatParams: [ this.readyCounterSp, this ], ease: CustomEase.create("custom", "M0,0 C0.46,0.094 0.283,1 0.5,1 0.704,1 0.554,0.098 1,0 "), repeat: 4, onComplete: this.onReadyCountStepFinish, onCompleteParams: [ this ] })
-    }
+    onReadyCountFinish( cObj ){
 
-    onReadyCountStep(cObj, pObj){
-        console.log(`${ pObj.screenID } Count Step!`)
-    }
-
-    onReadyCountStepFinish(pObj){
-        this.readyCountStepTween = gsap.to( pObj.readyCounterSp.scale, {x: 0, y: 0, duration: 1.0, ease: "cubic.inout", delay:0.4, onComplete: pObj.onReadyCountFinish, onCompleteParams: [ pObj.readyCounterSp, pObj ]})
-    }
-
-    onReadyCountFinish(cObj, pObj){
-
+        const pObj = cObj.parent
         pObj.initEvent()
-        gsap.killTweensOf(pObj.readyCountTween)
-        gsap.killTweensOf(pObj.readyCountStepTween)
-        pObj.readyCountTween = null
-        pObj.readyCountStepTween = null
         console.log("Game Start")
-        cObj.visible = false
-        pObj.startGame()
+        
+        pObj.removeChild( cObj )
+        pObj.gameReady = null
+
+        //pObj.startGame()
     }
     //Count Ready
 
@@ -232,8 +227,9 @@ export class GameMain extends PIXI.Container{
     }
 
     updateGame2(deltaTime){
-        if( this.gameScore ){
-            this.gameScore.circleUI.update();
+        if( this.gameBgMove ){
+            //this.gameScore.circleUI.update();
+            this.gameBgMove.update()
         }
     }
 
@@ -301,7 +297,7 @@ export class GameMain extends PIXI.Container{
 
         if( getType == "get" ){
             pObj.score += 1
-            pObj.scoreTxt.text = pObj.score.toString()
+            //pObj.scoreTxt.text = pObj.score.toString()
         }else{
 
         }
