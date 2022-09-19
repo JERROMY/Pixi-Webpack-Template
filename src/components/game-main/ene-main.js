@@ -1,12 +1,13 @@
 import gsap from "gsap"
 import * as PIXI from 'pixi.js'
+import { GlowFilter } from 'pixi-filters'
 
 export class Ene extends PIXI.Container{
 
 
     constructor(eneID, resources, delegate, parentObj, sizes, screenID, char, isFever, isReward, speed){
         super()
-
+        
         const self = this
         this.screenID = screenID
         this.resources = resources
@@ -15,8 +16,28 @@ export class Ene extends PIXI.Container{
 
         this.resources = resources
         this.textTypeAll = []
+        this.scoreMap = new Map();
+        this.glowFilter = new GlowFilter(15, 2, 1, 0xff9999, 0.5);
 
-        if( ! isReward ){
+        this.scoreMap.set( "eb1",  -400);
+        this.scoreMap.set( "eb2",  -100);
+        this.scoreMap.set( "eb3",  -400);
+        this.scoreMap.set( "eb4",  -200);
+        this.scoreMap.set( "eb5",  -100);
+        this.scoreMap.set( "eb6",  -300);
+
+        this.scoreMap.set( "eg1",  300);
+        this.scoreMap.set( "eg2",  400);
+        this.scoreMap.set( "eg3",  400);
+        this.scoreMap.set( "eg4",  200);
+        this.scoreMap.set( "eg5",  200);
+        this.scoreMap.set( "eg6",  100);
+        this.scoreMap.set( "eg7",  100);
+        this.scoreMap.set( "esp",  500);
+
+        this.isReward = isReward
+
+        if( ! this.isReward ){
             if(! isFever){
 
                 this.textTypeAll.push(this.resources["eb1"].texture)
@@ -32,6 +53,7 @@ export class Ene extends PIXI.Container{
                 this.textTypeAll.push(this.resources["eg4"].texture)
                 this.textTypeAll.push(this.resources["eg5"].texture)
                 this.textTypeAll.push(this.resources["eg6"].texture)
+                this.textTypeAll.push(this.resources["eg7"].texture)
     
                 //this.textTypeAll.push(this.resources["esp"].texture)
     
@@ -43,6 +65,7 @@ export class Ene extends PIXI.Container{
                 this.textTypeAll.push(this.resources["eg4"].texture)
                 this.textTypeAll.push(this.resources["eg5"].texture)
                 this.textTypeAll.push(this.resources["eg6"].texture)
+                this.textTypeAll.push(this.resources["eg7"].texture)
             }
         }else{
             this.textTypeAll.push(this.resources["esp"].texture)
@@ -53,8 +76,9 @@ export class Ene extends PIXI.Container{
         this.eneID = eneID
         this.eneTypesCount = this.textTypeAll.length
         this.textID = Math.floor( Math.random()*this.eneTypesCount )
-        
-        this.eneSp = new PIXI.Sprite( this.textTypeAll[this.textID] )
+        this.texture = this.textTypeAll[this.textID]
+        this.eneName = this.texture.textureCacheIds[0]
+        this.eneSp = new PIXI.Sprite( this.texture )
         this.eneSp.anchor.set(0.5)
         this.eneSp.scale.set( Math.random() * 0.5 + 0.7 )
         this.addChild(this.eneSp)
@@ -64,6 +88,7 @@ export class Ene extends PIXI.Container{
         this.isRemoved = false
 
         this.char = char
+        this.scoreNum = this.scoreMap.get( this.eneName )
 
         parentObj.addChild(this)
 
@@ -77,10 +102,30 @@ export class Ene extends PIXI.Container{
         this.position.y = monArr[ this.eneChooseID ].position.y + 20
         parentObj.swapChildren( monArr[ this.eneChooseID ], this )
 
+        if(isFever){
+            this.filters = [ this.glowFilter ]
+            this.vy *= 1.5
+        }
+
     }
 
     destroyEne(){
         //this.visible = false;
+
+        let eneStatus = "get"
+        
+        if(this.eneName.indexOf("eg") != -1){
+            eneStatus = "get"
+        }else if(this.eneName.indexOf("eb") != -1){
+            eneStatus = "hit"
+        }else if(this.eneName.indexOf("esp") != -1){
+            eneStatus = "sp"
+        }else{
+            eneStatus = "out"
+        }
+        
+        this.delegate.onBeforeRemoved( this.char.parent, eneStatus, this.scoreNum)
+        
         
         if( ! this.isRemoved ){
             this.isRemoved = true
@@ -92,8 +137,10 @@ export class Ene extends PIXI.Container{
     }
 
     onEneDestroy( pObj ){
-        
-        pObj.delegate.onEneRemoved( pObj.eneID, pObj.char.parent, "get" )
+
+        pObj.delegate.onEneRemoved( pObj.eneID, pObj.char.parent )
+   
+   
     }
 
     update(){
@@ -115,6 +162,9 @@ export class Ene extends PIXI.Container{
                 const minDist = ( ( this.char.width + this.width ) / 2 ) * 0.8
 
                 if(c < minDist){
+                    // if(  ){
+
+                    // }
                     this.destroyEne()
                 }
 

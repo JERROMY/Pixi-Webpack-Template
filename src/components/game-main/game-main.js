@@ -5,6 +5,7 @@ import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
 
 import * as PIXI from 'pixi.js'
+import { GlowFilter } from 'pixi-filters'
 import { StartPage } from './start-page'
 import { GameScore } from './game-score'
 import { GameReady } from './game-ready'
@@ -18,6 +19,9 @@ export class GameMain extends PIXI.Container{
 
     constructor(screenID, resources){
         super()
+
+        //const outlineFilterBlue = new PIXI.filters.OutlineFilter(2, 0x99ff99);
+       this.glowFilter = new GlowFilter(15, 2, 1, 0xff9999, 0.5);
 
         const self = this
 
@@ -40,6 +44,7 @@ export class GameMain extends PIXI.Container{
 
         this.eneDelegate = {
             onEneRemoved: self.onEneRemoved,
+            onBeforeRemoved: self.onBeforeRemoved,
         }
 
         this.pageDelegate = {
@@ -77,6 +82,10 @@ export class GameMain extends PIXI.Container{
 
         //Count Second
         this.totalTime = 30
+        this.totalTimeMax = this.totalTime
+        this.rewardPeriod = 10
+        this.rewardCount = 1
+        this.rewardCountMax = 30 / this.rewardPeriod - 1
         
         this.countingTxt = new PIXI.Text(this.totalTime.toString(), { fontFamily: 'Arial', fontSize: 10, fontWeight: 'bold', fill: '#000000', align: 'center', stroke: '#FFFFFF', strokeThickness: 3 })
         this.countingTxt.anchor.set(0.5)
@@ -84,6 +93,9 @@ export class GameMain extends PIXI.Container{
         this.countingTxt.position.x = this.gW - this.countingTxt.width - 10
         this.countingTxt.position.y = 0 + this.countingTxt.height/2 + 10
         this.addChild(this.countingTxt)
+
+        this.feverTimeMax = 5
+        this.feverTime = 0
 
         
 
@@ -97,6 +109,7 @@ export class GameMain extends PIXI.Container{
         //Char
 
         this.char = new Char( this.resources )
+        
         //this.char.scale.set( 0.5 )
         this.char.position.x = this.gW/2
         this.char.position.y = this.gH - this.char.height/2 - 40
@@ -251,9 +264,68 @@ export class GameMain extends PIXI.Container{
             //console.log(restTime);
             
             if( this.gameBgMove ){
-                this.gameBgMove.update( 0.5 )
+                if(this.isFever){
+                    this.gameBgMove.update( 8.0 )
+                }else{
+                    this.gameBgMove.update( 3.0 )
+                }
+                
             }
-            
+            if( this.char ){
+                this.char.update( deltaTime )
+            }
+
+            const nextRewardTime = this.totalTimeMax - this.rewardPeriod * this.rewardCount
+            // console.log( nextRewardTime )
+            if(restTime <= nextRewardTime){
+                if( ! this.isReward ){
+                    this.isReward = true
+                    //console.log( this.isReward )
+                    this.rewardCount += 1
+                }
+                
+            }else{
+                
+            }
+
+            if(this.rewardCount > this.rewardCountMax){
+                this.rewardCount = this.rewardCountMax * 10
+            }
+
+            if(this.isFever){
+                
+                
+                
+                
+                
+                this.feverTime += deltaTime
+                // console.log( this.feverTime + " " + this.feverTimeMax )
+                const feverPercent = this.feverTime / this.feverTimeMax
+                
+                if(this.feverPercent >= 1){
+                    this.feverPercent = 1
+                }
+
+                
+
+                const rotSeg = 360 * feverPercent
+
+                //console.log( feverPercent )
+
+                if(this.gameScore){
+                    this.gameScore.circleUI.update( rotSeg )
+                }
+
+
+
+                //console.log( this.feverTime )
+                if( this.feverTime >= this.feverTimeMax ){
+                    this.feverTime = 0
+                    this.isFever = false
+                    this.recoverEffect()
+                }
+            }
+
             this.genEne()
 
         }
@@ -263,6 +335,18 @@ export class GameMain extends PIXI.Container{
 
 
 
+    }
+
+    feverEffect(){
+        this.char.filters = [ this.glowFilter ]
+        this.gameScore.filters = [ this.glowFilter ]
+        this.eneTickMax = 20
+    }
+
+    recoverEffect(){
+        this.char.filters = []
+        this.gameScore.filters = []
+        this.eneTickMax = 60
     }
 
     clearAllEne(){
@@ -283,9 +367,17 @@ export class GameMain extends PIXI.Container{
             //console.log( timestamp );
             this.eneTickCount = 0
             
+
+
             const eneVy = Math.random()*3+3
             const ene = new Ene(timestamp, this.resources, this.eneDelegate, this.gameBgMove, this.sizes, this.screenID, this.char, this.isFever, this.isReward, eneVy)
             this.eneMap.set(timestamp, ene)
+            
+            //this.rewardCount += 1
+            //this.isReward = false
+
+        
+            
             //console.log( this.eneMap );
         }
 
@@ -293,15 +385,53 @@ export class GameMain extends PIXI.Container{
         if(eneCount > 0){
             for (const [key, obj] of this.eneMap.entries()) {
                 obj.update()
-
                 
+                if(obj.isReward){
+                    this.isReward = false
+                }
         
 
             }
         }
     }
 
-    onEneRemoved( eneID, pObj, getType ){
+    onBeforeRemoved( pObj, getType, scoreNum ){
+
+        if( getType == "get" ){
+            if( pObj.phase == "END" ){
+            }else if( pObj.phase == "START" ){
+                pObj.char.showScore(scoreNum)
+                pObj.score += scoreNum
+            }
+            //pObj.scoreTxt.text = pObj.score.toString()
+        }else if( getType == "hit" ){
+            if( pObj.phase == "END" ){
+            }else if( pObj.phase == "START" ){
+                pObj.char.showScore(scoreNum)
+                pObj.score += scoreNum
+                pObj.char.setCharStauts( "hit" )
+            }
+        }else if( getType == "out" ){
+        }else if( getType == "sp" ){
+            if( pObj.phase == "END" ){
+            }else if( pObj.phase == "START" ){
+                pObj.char.showScore(scoreNum)
+                pObj.score += scoreNum
+                pObj.char.setCharStauts( "hit" )
+                pObj.isFever = true
+                pObj.feverEffect()
+            }
+        }else{
+        }
+        
+        if( pObj.score <= 0 ){
+            pObj.score = 0
+        }
+        pObj.gameScore.setGameScore( pObj.score )
+
+    }
+
+    onEneRemoved( eneID, pObj ){
         //console.log(` ${ eneID } Removed! `);
         //console.log( this );
         const eneObj = pObj.eneMap.get( eneID )
@@ -309,19 +439,8 @@ export class GameMain extends PIXI.Container{
         pObj.removeChild( eneObj )
         pObj.eneMap.delete( eneID )
 
-        if( getType == "get" ){
+       
 
-            if( this.phase != "END" ){
-                pObj.score += 1
-            }else if( this.phase == "START" ){
-
-            }
-            
-            //pObj.scoreTxt.text = pObj.score.toString()
-        }else{
-
-        }
-        
     }
     
 

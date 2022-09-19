@@ -45,10 +45,10 @@ export class CircleUI extends PIXI.Container {
         
     }
 
-    update(){
+    update(rot){
         //console.log( "update circ" )
         
-        this.rot += this.moveSeg
+        this.rot = rot
 
         if(this.rot >= 360){
             this.rot = 0

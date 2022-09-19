@@ -39,7 +39,7 @@ export class GameScore extends PIXI.Container {
 
         this.score = 0
 
-        this.scoreTxt = new PIXI.BitmapText( Utils.zeroPad( this.score, 4 ), { fontName: 'GameFont', fontSize: 25, align: 'center' })
+        this.scoreTxt = new PIXI.BitmapText( "", { fontName: 'GameFont', fontSize: 25, align: 'center' })
         this.scoreTxt.tint = 0xFFDB00
         this.scoreTxt.anchor.set(0.5)
         this.addChild(this.scoreTxt)
@@ -48,7 +48,7 @@ export class GameScore extends PIXI.Container {
         this.mask = this.scoreMask
 
         
-
+        this.setGameScore( this.score )
         //arc.lineStyle(5, 0xAA00BB, 1);
 
         
@@ -56,15 +56,30 @@ export class GameScore extends PIXI.Container {
         this.position.x = this.gW/2
         this.position.y = this.scoreBg.height/2 + 20
 
-        
+        this.aniScore;
 
         this.delegate = delegate
 
     }
 
     setGameScore( score ){
-        this.score = score
-        this.scoreTxt.text = Utils.zeroPad( this.score, 4 )
+        //this.score = score
+        if(this.aniScore){
+            this.aniScore.kill()
+            this.aniScore = null
+        }
+        this.aniScore = gsap.to( this, { score: score, duration: 0.6, ease: "cubic.in",onUpdate: this.onScoreUpdate, onUpdateParams: [ this ] , onComplete: this.onScoreAniFinish, onCompleteParams: [ this ]})
+
+        
+    }
+
+    onScoreUpdate( pObj ){
+        const scoreNum = Math.floor( pObj.score )
+        pObj.scoreTxt.text = Utils.zeroPad( scoreNum, 6 ).toString()
+    }
+
+    onScoreAniFinish( pObj ){
+
     }
 
     
