@@ -4,26 +4,78 @@ import * as PIXI from 'pixi.js'
 export class Ene extends PIXI.Container{
 
 
-    constructor(eneID, resources, delegate){
-        super();
+    constructor(eneID, resources, delegate, parentObj, sizes, screenID, char, isFever, isReward, speed){
+        super()
 
-        this.resources = resources;
-        this.textType = [];
-        this.textType.push(this.resources["enemyType1"].texture);
-        this.textType.push(this.resources["enemyType2"].texture);
-        this.textType.push(this.resources["enemyType3"].texture);
+        const self = this
+        this.screenID = screenID
+        this.resources = resources
+        this.gW = sizes.gW
+        this.gH = sizes.gH
 
-        this.eneID = eneID;
-        this.textID = Math.floor(Math.random()*3);
+        this.resources = resources
+        this.textTypeAll = []
+
+        if( ! isReward ){
+            if(! isFever){
+
+                this.textTypeAll.push(this.resources["eb1"].texture)
+                this.textTypeAll.push(this.resources["eb2"].texture)
+                this.textTypeAll.push(this.resources["eb3"].texture)
+                this.textTypeAll.push(this.resources["eb4"].texture)
+                this.textTypeAll.push(this.resources["eb5"].texture)
+                this.textTypeAll.push(this.resources["eb6"].texture)
+    
+                this.textTypeAll.push(this.resources["eg1"].texture)
+                this.textTypeAll.push(this.resources["eg2"].texture)
+                this.textTypeAll.push(this.resources["eg3"].texture)
+                this.textTypeAll.push(this.resources["eg4"].texture)
+                this.textTypeAll.push(this.resources["eg5"].texture)
+                this.textTypeAll.push(this.resources["eg6"].texture)
+    
+                //this.textTypeAll.push(this.resources["esp"].texture)
+    
+            }else{
+                
+                this.textTypeAll.push(this.resources["eg1"].texture)
+                this.textTypeAll.push(this.resources["eg2"].texture)
+                this.textTypeAll.push(this.resources["eg3"].texture)
+                this.textTypeAll.push(this.resources["eg4"].texture)
+                this.textTypeAll.push(this.resources["eg5"].texture)
+                this.textTypeAll.push(this.resources["eg6"].texture)
+            }
+        }else{
+            this.textTypeAll.push(this.resources["esp"].texture)
+        }
         
-        this.eneSp = new PIXI.Sprite( this.textType[this.textID] );
-        this.eneSp.anchor.set(0.5);
-        this.eneSp.scale.set( Math.random() * 0.5 + 0.5 );
-        this.addChild(this.eneSp);
-        this.delegate = delegate;
+        
 
-        this.vy = Math.random()*3+3;
-        this.isRemoved = false;
+        this.eneID = eneID
+        this.eneTypesCount = this.textTypeAll.length
+        this.textID = Math.floor( Math.random()*this.eneTypesCount )
+        
+        this.eneSp = new PIXI.Sprite( this.textTypeAll[this.textID] )
+        this.eneSp.anchor.set(0.5)
+        this.eneSp.scale.set( Math.random() * 0.5 + 0.7 )
+        this.addChild(this.eneSp)
+        this.delegate = delegate
+
+        this.vy = speed
+        this.isRemoved = false
+
+        this.char = char
+
+        parentObj.addChild(this)
+
+        const monArr = parentObj.monPosiArr
+
+        this.eneChooseID = Math.floor(( Math.random()*monArr.length ))
+
+
+        //this.position.x = Math.random() * this.gW
+        this.position.x = monArr[ this.eneChooseID ].position.x + (Math.random()*40-20)
+        this.position.y = monArr[ this.eneChooseID ].position.y + 20
+        parentObj.swapChildren( monArr[ this.eneChooseID ], this )
 
     }
 
@@ -31,8 +83,8 @@ export class Ene extends PIXI.Container{
         //this.visible = false;
         
         if( ! this.isRemoved ){
-            this.isRemoved = true;
-            gsap.to( this.scale, {x: 0, y: 0, duration: 0.6, ease: "cubic.in", onComplete: this.onEneDestroy, onCompleteParams: [ this ]});
+            this.isRemoved = true
+            gsap.to( this.scale, {x: 0, y: 0, duration: 0.6, ease: "cubic.in", onComplete: this.onEneDestroy, onCompleteParams: [ this ]})
         }
         
 
@@ -41,28 +93,29 @@ export class Ene extends PIXI.Container{
 
     onEneDestroy( pObj ){
         
-        pObj.delegate.onEneRemoved( pObj.eneID, pObj.parent, "get" );
+        pObj.delegate.onEneRemoved( pObj.eneID, pObj.char.parent, "get" )
     }
 
     update(){
         if( ! this.isRemoved ){
-            this.position.y += this.vy;
-            if(this.position.y > this.parent.gH + 100){
-                this.visible = false;
-                this.isRemoved = true;
-                this.delegate.onEneRemoved( this.eneID, this.parent, "out" );
+            this.position.y += this.vy
+            if(this.position.y > this.gH + 100){
+                this.visible = false
+                this.isRemoved = true
+                this.delegate.onEneRemoved( this.eneID, this.char.parent, "out" )
             }else{
 
-                const p1 = this.parent.char.position;
-                const p2 = this.position;
+                const p1 = this.char.position
+                const p2 = this.position
                 
-                const a = p1.x - p2.x;
-                const b = p1.y - p2.y;
+                const a = p1.x - p2.x
+                const b = p1.y - p2.y
 
-                var c = Math.sqrt( a*a + b*b );
+                const c = Math.sqrt( a*a + b*b )
+                const minDist = ( ( this.char.width + this.width ) / 2 ) * 0.8
 
-                if(c < ( this.parent.char.width + this.width ) / 2 ){
-                    this.destroyEne();
+                if(c < minDist){
+                    this.destroyEne()
                 }
 
             }

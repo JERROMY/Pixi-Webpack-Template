@@ -8,6 +8,7 @@ import * as PIXI from 'pixi.js'
 import { StartPage } from './start-page'
 import { GameScore } from './game-score'
 import { GameReady } from './game-ready'
+import { GameEnd } from './game-end'
 import { GameBgMove } from './game-bg-move'
 import { Char } from './char-main'
 import { Ene } from './ene-main'
@@ -48,6 +49,10 @@ export class GameMain extends PIXI.Container{
 
         this.gameReadyDelegate = {
             onReadyCountFinish: self.onReadyCountFinish,
+        }
+
+        this.gameEndDelegate = {
+            onEndGameFadeOut: self.onEndGameFadeOut,
         }
         //Delegate
 
@@ -116,12 +121,8 @@ export class GameMain extends PIXI.Container{
 
 
         //Game End
-        this.endGameSp = new PIXI.Sprite( this.resources["end"].texture );
-        this.endGameSp.anchor.x = this.endGameSp.anchor.y = 0.5
-        this.endGameSp.position.x = this.gW/2
-        this.endGameSp.position.y = this.gH/2
-        this.addChild(this.endGameSp)
-        this.endGameSp.alpha = 0;
+       this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
+       this.addChild( this.gameEnd )
         
 
         console.log(`Game ${ this.screenID } Ready!`)
@@ -132,6 +133,8 @@ export class GameMain extends PIXI.Container{
         this.eneTickCount = 0
         this.eneTickMax = 60
 
+        this.isFever = false
+        this.isReward = false
         
 
         //Start Page
@@ -208,7 +211,7 @@ export class GameMain extends PIXI.Container{
         pObj.removeChild( cObj )
         pObj.gameReady = null
 
-        //pObj.startGame()
+        pObj.startGame()
     }
     //Count Ready
 
@@ -219,18 +222,17 @@ export class GameMain extends PIXI.Container{
     endGame(){
         console.log("Game End !")
         this.offEvent()
-        gsap.to( this.endGameSp, {alpha: 1, duration: 0.6, ease: "cubic.in", onComplete: this.onEndGameSpFadeOut, onCompleteParams: [this]})
+        this.clearAllEne()
+        this.gameEnd.showEnd()
+
     }
 
-    onEndGameSpFadeOut(pObj){
+    onEndGameFadeOut( pObj ){
 
     }
 
     updateGame2(deltaTime){
-        if( this.gameBgMove ){
-            //this.gameScore.circleUI.update();
-            this.gameBgMove.update()
-        }
+        
     }
 
     updateGame(deltaTime){
@@ -243,12 +245,17 @@ export class GameMain extends PIXI.Container{
             restTime = 0;
             //console.log(restTime);
             this.phase = "END"
-
             this.endGame()
         
         }else{
             //console.log(restTime);
+            
+            if( this.gameBgMove ){
+                this.gameBgMove.update( 0.5 )
+            }
+            
             this.genEne()
+
         }
 
         this.countingTxt.text = restTime.toString()
@@ -256,6 +263,15 @@ export class GameMain extends PIXI.Container{
 
 
 
+    }
+
+    clearAllEne(){
+        const eneCount = this.eneMap.size
+        if(eneCount > 0){
+            for (const [key, obj] of this.eneMap.entries()) {
+                obj.destroyEne()
+            }
+        }
     }
 
     genEne(){
@@ -267,10 +283,8 @@ export class GameMain extends PIXI.Container{
             //console.log( timestamp );
             this.eneTickCount = 0
             
-            
-            const ene = new Ene(timestamp, this.resources, this.eneDelegate)
-            this.addChild(ene)
-            ene.position.x = Math.random() * this.gW
+            const eneVy = Math.random()*3+3
+            const ene = new Ene(timestamp, this.resources, this.eneDelegate, this.gameBgMove, this.sizes, this.screenID, this.char, this.isFever, this.isReward, eneVy)
             this.eneMap.set(timestamp, ene)
             //console.log( this.eneMap );
         }
@@ -296,7 +310,13 @@ export class GameMain extends PIXI.Container{
         pObj.eneMap.delete( eneID )
 
         if( getType == "get" ){
-            pObj.score += 1
+
+            if( this.phase != "END" ){
+                pObj.score += 1
+            }else if( this.phase == "START" ){
+
+            }
+            
             //pObj.scoreTxt.text = pObj.score.toString()
         }else{
 

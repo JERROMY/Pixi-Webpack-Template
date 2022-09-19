@@ -47,6 +47,8 @@ export class GameBgMove extends PIXI.Container {
         this.roadsContainer.addChild( this.maskG )
         this.roadsContainer.mask = this.maskG
 
+        this.monPosiArr = []
+
         this.mon1 = new PIXI.Sprite( this.resources[ "Mon1" ].texture ) 
         this.mon1.anchor.set( 0.5 )
         this.mon1.position.x = 92
@@ -65,13 +67,17 @@ export class GameBgMove extends PIXI.Container {
         this.mon3.position.y = 220
         this.addChild( this.mon3 )
 
+        this.monPosiArr.push( this.mon1 )
+        this.monPosiArr.push( this.mon2 )
+        this.monPosiArr.push( this.mon3 )
+
     }
 
-    update(){
+    update( vy ){
         let roadCount = this.roadsAll.length;
         for( let i = 0 ; i < roadCount ; i++  ){
             const road = this.roadsAll[i]
-            road.update()
+            road.update( vy )
         }
     }
 }
@@ -120,14 +126,14 @@ class Road extends PIXI.Container {
         
     }
 
-    update(){
+    update( vy ){
         //console.log("Update Road");
         
         if( this.roadsContainer.position.y >= this.roadH){
             this.roadsContainer.position.y = 0
         }
 
-        this.roadsContainer.position.y += this.vy
+        this.roadsContainer.position.y += vy
     }
 
 
