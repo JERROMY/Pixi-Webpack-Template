@@ -92,9 +92,9 @@ export class GameMain extends PIXI.Container{
         //Char
 
         this.char = new Char( this.resources )
-        this.char.scale.set( 0.5 )
+        //this.char.scale.set( 0.5 )
         this.char.position.x = this.gW/2
-        this.char.position.y = this.gH - this.char.height
+        this.char.position.y = this.gH - this.char.height/2 - 40
 
         this.addChild( this.char )
 

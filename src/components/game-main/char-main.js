@@ -7,9 +7,11 @@ export class Char extends PIXI.Container{
         super();
 
         this.resources = resources;
-        this.charSp = new PIXI.Sprite( this.resources["char"].texture );
-        this.charSp.anchor.set(0.5);
-        this.addChild(this.charSp);
+        this.charSp = new PIXI.Sprite( this.resources["Char1"].texture )
+        this.charSp.anchor.set(0.5)
+        this.addChild(this.charSp)
+        // this.scale.set( 3 )
+
 
     }
 

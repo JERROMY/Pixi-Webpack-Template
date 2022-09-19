@@ -143,6 +143,16 @@ class PixiMain {
 
         // this.gameStages.push(game2)
 
+        // const game3 = new GameMain(3, this.assetsLoader.resources)
+        // this.stage.addChild(game3)
+
+        // this.gameStages.push(game3)
+
+        // const game4 = new GameMain(4, this.assetsLoader.resources)
+        // this.stage.addChild(game4)
+
+        // this.gameStages.push(game4)
+
 
         this.resizeGame()
 
