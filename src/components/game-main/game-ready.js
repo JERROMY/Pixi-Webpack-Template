@@ -38,11 +38,18 @@ export class GameReady extends PIXI.Container {
         this.aniTOut
         this.aniReady
 
-        this.startTransitionIn();
+        //this.startTransitionIn();
 
     }
 
     startTransitionIn(){
+        this.countNum = 3
+        this.readyTxt.text = "READY?"
+        this.scale.set( 1 )
+        this.alpha = 0
+        this.visible = true
+        this.countTxt.text = "3"
+        this.countTxt.scale.set( 1 )
         this.aniTIn = gsap.to(this, {alpha: 1.0, ease: "circ.inout", onComplete: this.onTrasitionIn, onCompleteParams: [ this ]})
     }
 
@@ -55,6 +62,7 @@ export class GameReady extends PIXI.Container {
     }
 
     onTrasitionOut( pObj ){
+        pObj.visible = false
         pObj.delegate.onReadyCountFinish( pObj )
     }
 

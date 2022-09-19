@@ -81,6 +81,8 @@ export class StartPage extends PIXI.Container {
         this.aniPlayerTxt
         this.aniStartBtn
 
+        this.alpha = 0
+
         this.delegate = delegate
 
         
@@ -90,7 +92,8 @@ export class StartPage extends PIXI.Container {
     //Page
 
     startPageTransitionIn(){
-
+        //this.onLogoTransitionIn()
+        this.startCreateQRCode()
     }
 
     onPageTransitionIn(){
@@ -190,7 +193,8 @@ export class StartPage extends PIXI.Container {
         this.monsterSp.alpha = 0
 
         this.t1 = gsap.timeline( { onComplete: this.onTransitionInComplete, onCompleteParams: [ this ]} )
-        this.t1.to(this.bg, { alpha: 1, duration:0.6, ease: "cubic.in" })
+        this.t1.to(this, { alpha: 1, duration:0.6, ease: "cubic.in" })
+                .to(this.bg, { alpha: 1, duration:0.6, ease: "cubic.in" })
                .to(this.logo.scale, { x: 1.0, y: 1.0, duration:0.8, ease: "back.out"}, "-=0.3")
                .to(this.monsterSp, { alpha: 1.0, duration:0.8, ease: "back.out"}, "-=0.6")
                .to(this.qrcodeSp, { alpha: 1.0, duration:0.8, ease: "back.out"}, "-=0.8")

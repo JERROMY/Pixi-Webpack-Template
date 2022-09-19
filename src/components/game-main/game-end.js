@@ -27,11 +27,28 @@ export class GameEnd extends PIXI.Container {
         this.alpha = 0
         this.visible = false
 
+        this.aniT1
+        this.aniT2
+
     }
 
     showEnd(){
         this.visible = true
-        gsap.to( this, {alpha: 1, duration: 0.6, delay: 1, ease: "cubic.in", onComplete: this.onEndGameSpFadeOut, onCompleteParams: [this]})
+        this.alpha = 0
+
+        if(this.aniT1){
+            this.aniT1.kill()
+            this.aniT1 = null
+        }
+
+        if(this.aniT2){
+            this.aniT2.kill()
+            this.aniT2 = null
+        }
+
+
+        this.aniT1 = gsap.to( this, {alpha: 1, duration: 0.6, delay: 1, ease: "cubic.in"})
+        this.aniT2 = gsap.to( this, {alpha: 0, duration: 1.0, delay: 1.6, ease: "cubic.in", onComplete: this.onEndGameSpFadeOut, onCompleteParams: [this]})
     }
 
     onEndGameSpFadeOut( pObj ){

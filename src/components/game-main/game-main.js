@@ -13,6 +13,7 @@ import { GameEnd } from './game-end'
 import { GameBgMove } from './game-bg-move'
 import { Char } from './char-main'
 import { Ene } from './ene-main'
+import { EndPage } from './end-page'
 
 
 export class GameMain extends PIXI.Container{
@@ -72,7 +73,7 @@ export class GameMain extends PIXI.Container{
 
         //Mask
         this.maskGraphic = new PIXI.Graphics()
-        this.maskGraphic.beginFill(0x00ff00)
+        this.maskGraphic.beginFill(0xffffff)
         this.maskGraphic.drawRect(0, 0, this.gW, this.gH)
         this.maskGraphic.endFill()
 
@@ -120,9 +121,6 @@ export class GameMain extends PIXI.Container{
 
 
         //Score
-
-        
-
         this.score = 0
         this.gameScore = new GameScore(this.screenID, this.resources, this.sizes, null)
         this.addChild( this.gameScore )
@@ -132,10 +130,19 @@ export class GameMain extends PIXI.Container{
         this.addChild( this.gameReady )
         //Count Ready
 
+        //Start Page
+        this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.pageDelegate)
+        this.addChild( this.startPage )
+        this.startPage.startPageTransitionIn()
 
         //Game End
-       this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
-       this.addChild( this.gameEnd )
+        this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
+        this.addChild( this.gameEnd )
+
+       //End Page
+       this.endPage = new EndPage( this.screenID, this.resources, this.sizes, this.pageDelegate )
+       this.addChild( this.endPage )
+       this.endPage.visible = false
         
 
         console.log(`Game ${ this.screenID } Ready!`)
@@ -149,10 +156,6 @@ export class GameMain extends PIXI.Container{
         this.isFever = false
         this.isReward = false
         
-
-        //Start Page
-        //this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.pageDelegate)
-        //this.addChild( this.startPage )
     }
 
     initObj(){
@@ -204,10 +207,18 @@ export class GameMain extends PIXI.Container{
         console.log( `Page Name: ${ page.pageName }` )
         // console.log( this )
         const pObj = page.parent
-        pObj.removeChild( page )
+        //pObj.removeChild( page )
+        page.visible = false
+        page.alpha = 0
         switch ( page.pageName ) {
             case "StartPage":
-                pObj.startPage = null
+                //pObj.startPage = null
+                pObj.gameReady.startTransitionIn()
+                break;
+            case "EndPage":
+
+                pObj.restartGame()
+                //pObj.endPage = null
                 break;
         
             default:
@@ -221,8 +232,8 @@ export class GameMain extends PIXI.Container{
         pObj.initEvent()
         console.log("Game Start")
         
-        pObj.removeChild( cObj )
-        pObj.gameReady = null
+        // pObj.removeChild( cObj )
+        // pObj.gameReady = null
 
         pObj.startGame()
     }
@@ -232,16 +243,34 @@ export class GameMain extends PIXI.Container{
         this.phase = "START"
     }
 
+    restartGame(){
+        console.log( "Reastart" )
+        this.phase = "READY"
+        this.feverTimeMax = 5
+        this.feverTime = 0
+        this.rewardCount = 1
+        this.totalTime = this.totalTimeMax
+        this.isReward = false
+        this.isFever = false
+        this.score = 0
+        this.recoverEffect()
+        this.startPage.visible = true
+        this.startPage.alpha = 0
+        this.startPage.startPageTransitionIn()
+    }
+
     endGame(){
         console.log("Game End !")
         this.offEvent()
         this.clearAllEne()
         this.gameEnd.showEnd()
+        
 
     }
 
     onEndGameFadeOut( pObj ){
-
+        pObj.parent.endPage.visible = true
+        pObj.parent.endPage.startPageTransitionIn( pObj.parent.score )
     }
 
     updateGame2(deltaTime){
