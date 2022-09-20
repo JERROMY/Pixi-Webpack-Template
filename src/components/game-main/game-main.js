@@ -22,13 +22,13 @@ export class GameMain extends PIXI.Container{
         super()
 
         //const outlineFilterBlue = new PIXI.filters.OutlineFilter(2, 0x99ff99);
-       this.glowFilter = new GlowFilter(15, 2, 1, 0xff9999, 0.5);
+        this.glowFilter = new GlowFilter(15, 2, 1, 0xff9999, 0.5);
 
         const self = this
 
         this.screenID = screenID
         this.resources = resources
-        console.log(this.resources)
+        //console.log(this.resources)
         this.bg = new PIXI.Sprite( this.resources["GameMainBg"].texture )
         //this.mask = new PIXI.Sprite( this.resources["testBg"].texture );
         this.bg.alpha = 0.5
@@ -104,6 +104,7 @@ export class GameMain extends PIXI.Container{
         //Count Second
 
         this.gameBgMove = new GameBgMove( this.screenID, this.resources, this.sizes, null )
+        //this.gameBgMove.cacheAsBitmap =
         this.addChild( this.gameBgMove )
 
         
@@ -210,6 +211,10 @@ export class GameMain extends PIXI.Container{
         //pObj.removeChild( page )
         page.visible = false
         page.alpha = 0
+        
+        //console.log( gsap.globalTimeline.getChildren() )
+        //gsap.globalTimeline.getChildren().forEach(t => t.kill());
+        
         switch ( page.pageName ) {
             case "StartPage":
                 //pObj.startPage = null
@@ -245,14 +250,24 @@ export class GameMain extends PIXI.Container{
 
     restartGame(){
         console.log( "Reastart" )
+
+        this.char.position.x = this.gW/2
+
+        if(this.gameScore){
+            this.gameScore.circleUI.update( 0 )
+        }
+        this.char.setCharStauts("normal")
+        this.char.hitDuration = 0
         this.phase = "READY"
         this.feverTimeMax = 5
         this.feverTime = 0
         this.rewardCount = 1
         this.totalTime = this.totalTimeMax
+        this.countingTxt.text = this.totalTime.toString()
         this.isReward = false
         this.isFever = false
         this.score = 0
+        this.eneTickCount = 0
         this.recoverEffect()
         this.startPage.visible = true
         this.startPage.alpha = 0
@@ -369,7 +384,7 @@ export class GameMain extends PIXI.Container{
     feverEffect(){
         this.char.filters = [ this.glowFilter ]
         this.gameScore.filters = [ this.glowFilter ]
-        this.eneTickMax = 20
+        this.eneTickMax = Math.random() * 35 + 25
     }
 
     recoverEffect(){
@@ -395,6 +410,13 @@ export class GameMain extends PIXI.Container{
             const timestamp = Math.floor(dateTime).toString()
             //console.log( timestamp );
             this.eneTickCount = 0
+
+
+            if(this.isFever){
+                this.eneTickMax = Math.random() * 35 + 25
+            }else{
+                this.eneTickMax = Math.random() * 10 + 60
+            }
             
 
 

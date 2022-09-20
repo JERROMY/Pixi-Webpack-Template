@@ -62,6 +62,20 @@ export class GameReady extends PIXI.Container {
     }
 
     onTrasitionOut( pObj ){
+
+        if(pObj.aniTIn){
+            pObj.aniTIn.kill()
+        }
+
+        if(pObj.aniReady){
+            pObj.aniReady.kill()
+        }
+
+        if(pObj.aniTOut){
+            pObj.aniTOut.kill()
+        }
+
+
         pObj.visible = false
         pObj.delegate.onReadyCountFinish( pObj )
     }

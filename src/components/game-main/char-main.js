@@ -23,6 +23,8 @@ export class Char extends PIXI.Container{
         this.ani2
 
         
+
+        
         // this.scale.set( 3 )
 
     }
@@ -32,7 +34,7 @@ export class Char extends PIXI.Container{
         this.charStatus = charS
 
         if( this.charStatus == "normal" ){
-
+            this.charSp.texture = this.tex1
         }else{
             this.hitDuration = this.hitDurationMax
             this.charSp.texture = this.tex2
@@ -41,6 +43,8 @@ export class Char extends PIXI.Container{
     }
 
     showScore( scoreNum ){
+
+
         let scoreStr = ""
         if(scoreNum > 0){
             scoreStr = "+" + scoreNum.toString()
@@ -52,17 +56,29 @@ export class Char extends PIXI.Container{
         const scoreTxt = new PIXI.BitmapText( scoreStr, { fontName: 'GameFont2', fontSize: 40, align: 'center' })
         scoreTxt.anchor.x = 1
         scoreTxt.anchor.y = 1
-        scoreTxt.position.x = Math.random()* -24 - 12
-        this.addChild(scoreTxt)
+        scoreTxt.position.x = this.position.x + ( Math.random()* -24 - 12 )
+        scoreTxt.position.y = this.position.y
+        this.parent.addChild(scoreTxt)
+        
 
         //onComplete: this.onEneDestroy, onCompleteParams: [ this ]
-        this.ani1 = gsap.to( scoreTxt, {y: -150, duration: 0.6, ease: "cubic.inout"})
-        this.ani2 = gsap.to( scoreTxt, {alpha: 0.5, duration: 0.8, ease: "cubic.inout", onComplete: this.onShowScore, onCompleteParams: [scoreTxt, this]})
+        //this.ani1 = gsap.to( scoreTxt, {y: this.position.y - 150, duration: 0.4, ease: "cubic.inout" , onComplete: this.onShowPreScore, onCompleteParams: [scoreTxt, this]})
+        //this.ani2 = gsap.to( scoreTxt, {alpha: 0, duration: 0.6, ease: "cubic.inout", onComplete: this.onShowScore, onCompleteParams: [scoreTxt, this]})
+
+        const t1 = gsap.timeline( { onComplete: this.onShowScore, onCompleteParams: [ scoreTxt, this ]} )
+        t1.to(scoreTxt, { y: this.position.y - 150, duration:0.4, ease: "cubic.inout" })
+                .to(scoreTxt, { alpha: 0, duration:0.5, ease: "cubic.inout" }, "-= 0.2")
 
     }
 
+    onShowPreScore( sObj, pObj ){
+        pObj.parent.removeChild( sObj )
+        this.kill()
+    }
+
     onShowScore( sObj, pObj ){
-        pObj.removeChild( sObj )
+        pObj.parent.removeChild( sObj )
+        this.kill()
     }
 
     update( deltaTime ){

@@ -13,7 +13,7 @@ context.keys().forEach(( filename )=>{
     images[fName] = context( filename )
 });
 
-console.log( images )
+//console.log( images )
 
 
 class AssetsLoader {
@@ -30,7 +30,7 @@ class AssetsLoader {
         
         this.delegate = delegate
         this.assetsMap = new Map(Object.entries( this.assetsData ))
-        console.log( this.assetsMap )
+        //console.log( this.assetsMap )
         
         this.maxAssets = this.assetsMap.size
         this.isLoadingReady = false
@@ -93,7 +93,7 @@ class AssetsLoader {
         })
 
         this.loader.onComplete.add((l, r) => {
-            console.log(l);
+            //console.log(l);
             console.log(r);
             //console.log();
             this.isLoadingReady = true;
@@ -120,7 +120,7 @@ class AssetsLoader {
         }
         
         let loadingPercent = Math.ceil(this.loadIndex/this.maxAssets*100)
-        console.log("Assets Loaded: " + this.loadIndex + " " + loadingPercent)
+        //console.log("Assets Loaded: " + this.loadIndex + " " + loadingPercent)
         this.loadingTxt.text = "Loading.. "+loadingPercent+"%";
         if(this.loadIndex == this.maxAssets){
             //console.log("Assets Loaded Complete!");

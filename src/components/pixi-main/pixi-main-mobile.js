@@ -5,8 +5,6 @@ import AssetsLoader from '../../assetsLoader'
 import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
 
-import { GameMain } from '../game-main/game-main'
-
 
 class PixiMain {
 
@@ -30,7 +28,7 @@ class PixiMain {
         gsap.registerPlugin(CustomEase)
 
         this.pixiData = pixiData
-        console.log("Pixi Ready")
+        console.log("Pixi Mobile Ready")
         this.initObj()
         this.initEvent()
         this.onWindowResize()
@@ -39,14 +37,14 @@ class PixiMain {
 
     initObj(){
 
-        console.log( "Init Game !" )
+        console.log( "Init Mobile Game !" )
 
         this.canvasContainer = document.getElementById('container-2d')
 
         const rendererOptions = {
             width: this.App_Width,
             height: this.App_Height,
-            antialias: false,
+            antialias: true,
             resolution: 1,
             resizeTo: this.canvasContainer,
             backgroundColor: 0xFFFFFF
@@ -54,8 +52,8 @@ class PixiMain {
 
         this.app = new PIXI.Application(rendererOptions);
 
-        //PIXI.settings.ROUND_PIXELS = true
-        //PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.LINEAR
+        PIXI.settings.ROUND_PIXELS = true
+        PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.LINEAR
 
         this.stage = this.app.stage
 
@@ -101,7 +99,7 @@ class PixiMain {
         console.log("Loaded Start")
     }
     onLoadFinish(){
-        console.log("Loaded Finished")
+        //console.log("Loaded Finished")
         //console.log( this );
         this.main.loadingComplete();
     }
@@ -110,7 +108,7 @@ class PixiMain {
   
 
         // Sprite Usage Example
-        //console.log("Loaded Finish 2");
+        // console.log("Loaded Finish 2");
         let tween = gsap.to(this.loadingTxt, {alpha: 0, duration: 0.8, delay:0, ease: "circ.in", onComplete: this.onPercentageTxtFadeOut, onCompleteParams: [ this.loadingTxt, this ]})
       
         // let sprite = new PIXI.Sprite(resources.ball.texture);
@@ -133,26 +131,25 @@ class PixiMain {
     }
 
     initGameObj(){
-        
-        const game1 = new GameMain(1, this.assetsLoader.resources)
-        this.stage.addChild(game1)
+        // const game1 = new GameMain(1, this.assetsLoader.resources)
+        // this.stage.addChild(game1)
 
-        this.gameStages.push(game1)
+        // this.gameStages.push(game1)
 
-        const game2 = new GameMain(2, this.assetsLoader.resources)
-        this.stage.addChild(game2)
+        // const game2 = new GameMain(2, this.assetsLoader.resources)
+        // this.stage.addChild(game2)
 
-        this.gameStages.push(game2)
+        // this.gameStages.push(game2)
 
-        const game3 = new GameMain(3, this.assetsLoader.resources)
-        this.stage.addChild(game3)
+        // const game3 = new GameMain(3, this.assetsLoader.resources)
+        // this.stage.addChild(game3)
 
-        this.gameStages.push(game3)
+        // this.gameStages.push(game3)
 
-        const game4 = new GameMain(4, this.assetsLoader.resources)
-        this.stage.addChild(game4)
+        // const game4 = new GameMain(4, this.assetsLoader.resources)
+        // this.stage.addChild(game4)
 
-        this.gameStages.push(game4)
+        // this.gameStages.push(game4)
 
 
         this.resizeGame()
@@ -163,7 +160,7 @@ class PixiMain {
 
     animate(delta) {
 
-        
+        //console.log( delta );
         //console.log( this );
 
         if(this.assetsLoader){
@@ -172,9 +169,7 @@ class PixiMain {
             //this.assetsLoader.isLoadingReady;
 
             if( this.assetsLoader.isLoadingReady ){
-                //const deltaTime = delta / this.app.ticker.FPS
-                const deltaTime = delta / 100
-                //console.log( deltaTime );
+                const deltaTime = delta / this.app.ticker.FPS
                 this.updateGame(deltaTime)
             }
         }
@@ -199,7 +194,7 @@ class PixiMain {
                 if(gameStage.phase == "START"){
                     gameStage.updateGame( deltaTime );
                 }else{
-                    //gameStage.updateGame2( deltaTime );
+                    gameStage.updateGame2( deltaTime );
                 }
             }
             
@@ -238,13 +233,11 @@ class PixiMain {
         let spaceTotal = 0
       
         spaceTotal = ( gameStageCount - 1 ) * spaceW
-
-        const sAppH = this.App_Height * 0.75;
       
         if(gameStageCount > 0){
           for(let i = 0 ; i < gameStageCount ; i++){
             const gameStage = this.gameStages[i]
-            gameStage.resizeGame(this.App_Width, sAppH)
+            gameStage.resizeGame(this.App_Width, this.App_Height)
             gameStage.position.x = this.App_Width / 2 + i * ( gameStage.width + spaceW )
             totalGameW += gameStage.width
           }
@@ -254,7 +247,6 @@ class PixiMain {
           for(let i = 0 ; i < gameStageCount ; i++){
             const gameStage = this.gameStages[i]
             gameStage.position.x -= totalGameW/2
-            gameStage.position.y = this.App_Height / 2 - sAppH / 2
             gameStage.initObj()
             //gameStage.startCountReady();
             //totalGameW += gameStage.width;

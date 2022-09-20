@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' )
 
+
 /*
 
 module
@@ -22,6 +23,7 @@ module.exports = {
     
     entry: {
         'index':'./src/index.js',
+        'index-mobile':'./src/index-mobile.js',
         'pixi-data':'./src/pixi-data.js',
     },
     output: {
@@ -108,9 +110,18 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             filename: 'index.html',
+            chunks: ['index'],
             title: 'Pixi 2D Web Template',
             // template: 'src/page-template.hbs',
             description: 'Test 2D Template',
+            minify: false,
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'index-mobile.html',
+            chunks: ['index-mobile'],
+            title: 'Pixi 2D Mobile Web Template',
+            // template: 'src/page-template.hbs',
+            description: 'Test 2D Mobile Template',
             minify: false,
         }),
     ]

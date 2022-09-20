@@ -190,6 +190,7 @@ export class EndPage extends PIXI.Container {
 
     startPageTransitionIn( score ){
 
+        //gsap.globalTimeline.getChildren().forEach(t => t.kill());
         this.score = 0
         this.setScore( this.score )
         this.targetScore = score
@@ -207,6 +208,11 @@ export class EndPage extends PIXI.Container {
     }
 
     onPageTransitionOut( pObj ){
+        if(pObj.t1){
+            pObj.t1.kill()
+            pObj.t1 = null
+        }
+
         pObj.delegate.onPageTransitionOut( pObj );
     }
 
