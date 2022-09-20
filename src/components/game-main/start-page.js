@@ -93,6 +93,7 @@ export class StartPage extends PIXI.Container {
 
     startPageTransitionIn(){
         //this.onLogoTransitionIn()
+        //gsap.globalTimeline.getChildren().forEach(t => t.kill());
         this.startCreateQRCode()
     }
 
@@ -111,6 +112,17 @@ export class StartPage extends PIXI.Container {
     }
 
     stopLoopAnimations(){
+
+        if(this.t1){
+            this.t1.kill()
+            this.t1 = null
+        }
+
+        if(this.t2){
+            this.t2.kill()
+            this.t2 = null
+        }
+
         if(this.aniTitle){
             this.aniTitle.kill()
             this.aniTitle = null

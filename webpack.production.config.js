@@ -3,7 +3,8 @@ const path = require( 'path' );
 // const TerserPlugin = require( 'terser-webpack-plugin' ); production is default
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
-const HtmlWebpackPlugin = require( 'html-webpack-plugin' )
+const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
+const TerserPlugin = require('terser-webpack-plugin');
 
 /*
 
@@ -21,12 +22,15 @@ module.exports = {
 
     entry: {
         'index':'./src/index.js',
+        'index-mobile':'./src/index-mobile.js',
         'pixi-data':'./src/pixi-data.js',
+        
     },
     output: {
         filename: '[name].[contenthash].js',
         path: path.resolve( __dirname, './dist' ),
-        publicPath: '',
+        publicPath: '/static/',
+        //publicPath: '',
         //assetModuleFilename: 'images/[hash][ext][query]'
     },
     devtool: 'inline-source-map',
@@ -98,11 +102,27 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             filename: 'index.html',
+            chunks: ['index'],
             title: 'Pixi 2D Web Template',
             // template: 'src/page-template.hbs',
             description: 'Test 2D Template',
             minify: true,
         }),
+        new HtmlWebpackPlugin({
+            filename: 'index-mobile.html',
+            chunks: ['index-mobile'],
+            title: 'Pixi 2D Mobile Web Template',
+            // template: 'src/page-template.hbs',
+            description: 'Test 2D Mobile Template',
+            minify: true,
+        }),
+        new TerserPlugin({
+            terserOptions: {
+              compress: {
+                drop_console: true
+              }
+            }
+        })
     ]
 
 

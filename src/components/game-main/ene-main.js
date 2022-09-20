@@ -107,6 +107,9 @@ export class Ene extends PIXI.Container{
             this.vy *= 1.5
         }
 
+        this.cacheAsBitmap = true
+        //this.filters = [] 
+
     }
 
     destroyEne(){
@@ -139,6 +142,7 @@ export class Ene extends PIXI.Container{
     onEneDestroy( pObj ){
 
         pObj.delegate.onEneRemoved( pObj.eneID, pObj.char.parent )
+        pObj.filters = [] 
    
    
     }
