@@ -1,7 +1,7 @@
 
 import * as PIXI from 'pixi.js'
 import AssetsLoader from '../../assetsLoader'
-
+import { GameMain } from '../game-main/game-main-mobile'
 import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
 
@@ -131,10 +131,12 @@ class PixiMain {
     }
 
     initGameObj(){
-        // const game1 = new GameMain(1, this.assetsLoader.resources)
-        // this.stage.addChild(game1)
 
-        // this.gameStages.push(game1)
+
+        const game1 = new GameMain(1, this.assetsLoader.resources)
+        this.stage.addChild(game1)
+
+        this.gameStages.push(game1)
 
         // const game2 = new GameMain(2, this.assetsLoader.resources)
         // this.stage.addChild(game2)
@@ -194,7 +196,7 @@ class PixiMain {
                 if(gameStage.phase == "START"){
                     gameStage.updateGame( deltaTime );
                 }else{
-                    gameStage.updateGame2( deltaTime );
+                    //gameStage.updateGame2( deltaTime );
                 }
             }
             
@@ -233,11 +235,13 @@ class PixiMain {
         let spaceTotal = 0
       
         spaceTotal = ( gameStageCount - 1 ) * spaceW
+
+        const sAppH = this.App_Height * 0.9;
       
         if(gameStageCount > 0){
           for(let i = 0 ; i < gameStageCount ; i++){
             const gameStage = this.gameStages[i]
-            gameStage.resizeGame(this.App_Width, this.App_Height)
+            gameStage.resizeGame(this.App_Width, sAppH)
             gameStage.position.x = this.App_Width / 2 + i * ( gameStage.width + spaceW )
             totalGameW += gameStage.width
           }
@@ -247,6 +251,7 @@ class PixiMain {
           for(let i = 0 ; i < gameStageCount ; i++){
             const gameStage = this.gameStages[i]
             gameStage.position.x -= totalGameW/2
+            gameStage.position.y = this.App_Height / 2 - sAppH / 2
             gameStage.initObj()
             //gameStage.startCountReady();
             //totalGameW += gameStage.width;
