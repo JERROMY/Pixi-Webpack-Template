@@ -98,6 +98,7 @@ class Road extends PIXI.Container {
 
         this.roadsContainer = new PIXI.Container()
         this.addChild( this.roadsContainer )
+        this.roadsContainer.cacheAsBitmap = true
         
         this.roadW = 0
         this.roadH = 0
@@ -128,6 +129,12 @@ class Road extends PIXI.Container {
 
     update( vy ){
         //console.log("Update Road");
+
+        if( this.roadsContainer.position.y >= this.roadH){
+            this.roadsContainer.position.y = 0
+        }
+
+        this.roadsContainer.position.y += vy
         
         if( this.roadsContainer.position.y >= this.roadH){
             this.roadsContainer.position.y = 0

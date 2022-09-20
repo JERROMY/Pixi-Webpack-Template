@@ -4,10 +4,13 @@ import * as PIXI from 'pixi.js'
 export class Char extends PIXI.Container{
 
 
-    constructor(resources){
+    constructor(resources, sizes){
         super();
 
         this.resources = resources;
+
+        this.gW = sizes.gW
+        this.gH = sizes.gH
 
         this.tex1 = this.resources["Char1"].texture
         this.tex2 = this.resources["Char2"].texture
@@ -51,12 +54,25 @@ export class Char extends PIXI.Container{
         }else{
             scoreStr = scoreNum.toString()
         }
+
+
         
 
         const scoreTxt = new PIXI.BitmapText( scoreStr, { fontName: 'GameFont2', fontSize: 40, align: 'center' })
-        scoreTxt.anchor.x = 1
-        scoreTxt.anchor.y = 1
-        scoreTxt.position.x = this.position.x + ( Math.random()* -24 - 12 )
+        
+
+        if( this.x > this.gW/2 ){
+            
+            scoreTxt.anchor.x = 1
+            scoreTxt.anchor.y = 1
+            scoreTxt.position.x = this.position.x + ( Math.random()* -24 - 12 )
+            
+        }else{
+            scoreTxt.anchor.x = 0
+            scoreTxt.anchor.y = 1
+            scoreTxt.position.x = this.position.x - ( Math.random()* -24 - 12 )
+        }
+        
         scoreTxt.position.y = this.position.y
         this.parent.addChild(scoreTxt)
         
@@ -66,8 +82,8 @@ export class Char extends PIXI.Container{
         //this.ani2 = gsap.to( scoreTxt, {alpha: 0, duration: 0.6, ease: "cubic.inout", onComplete: this.onShowScore, onCompleteParams: [scoreTxt, this]})
 
         const t1 = gsap.timeline( { onComplete: this.onShowScore, onCompleteParams: [ scoreTxt, this ]} )
-        t1.to(scoreTxt, { y: this.position.y - 150, duration:0.4, ease: "cubic.inout" })
-                .to(scoreTxt, { alpha: 0, duration:0.5, ease: "cubic.inout" }, "-= 0.2")
+        t1.to(scoreTxt, { y: this.position.y - (Math.random()*40+150), duration:0.5, ease: "cubic.inout" })
+                .to(scoreTxt, { alpha: 0, duration:0.3, ease: "cubic.inout" })
 
     }
 
