@@ -2,6 +2,7 @@ import { Utils } from './utils'
 
 import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
+import { GameBall } from './game-ball'
 import { DeviceContol } from './device-control'
 
 import * as PIXI from 'pixi.js'
@@ -16,7 +17,7 @@ export class GameMain extends PIXI.Container{
         this.screenID = screenID
         this.resources = resources
         //console.log(this.resources)
-        this.bg = new PIXI.Sprite( this.resources["GameMainBg"].texture )
+        this.bg = new PIXI.Sprite( this.resources[ "GameMainBg" ].texture )
         //this.mask = new PIXI.Sprite( this.resources["testBg"].texture );
         this.bg.alpha = 0.5
         this.gW = this.bg.width
@@ -28,6 +29,12 @@ export class GameMain extends PIXI.Container{
         //console.log(`G W: ${ this.gW } G H: ${ this.gH }`);
         this.addChild( this.bg )
 
+        this.ball = new GameBall( this.screenID, this.resources, this.sizes, null )
+        this.addChild( this.ball )
+
+        this.tempX = 0
+        
+
         this.phase = "READY"
 
 
@@ -35,6 +42,7 @@ export class GameMain extends PIXI.Container{
 
         this.deviceControlDelegate = {
             onGetAcc: self.onGetAcc,
+            onGetOri: self.onGetOri,
         }
 
         this.deviceControl = new DeviceContol( this.screenID, this.resources, this.sizes, this.deviceControlDelegate )
@@ -59,7 +67,22 @@ export class GameMain extends PIXI.Container{
     }
 
     onGetAcc( xVal, yVal ){
-        console.log( xVal + " " + yVal )
+        //console.log( xVal + " " + yVal )
+    }
+
+    onGetOri( r, xVal, yVal, parent ){
+
+
+        const diffX = xVal - parent.tempX
+        //console.log( diffX )
+        //console.log( parent )
+
+        parent.ball.update( diffX )
+
+        parent.tempX = xVal
+
+        //const 
+        //console.log( r + " " + xVal + " " + yVal )
     }
 
     updateGame(deltaTime){

@@ -90,7 +90,39 @@ export class Utils{
         return "unknown";
     }
 
-    static GetDeviceControl ( delegate ) {
+
+    /*
+
+    const getMobileOS = () => {
+    const ua = navigator.userAgent
+    if (/android/i.test(ua)) {
+        return "Android"
+    }
+    else if (/iPad|iPhone|iPod/.test(ua))
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1){
+        return "iOS"
+    }
+    return "Other"
+    }
+
+
+    */
+
+    static GetDeviceControlAndroid( delegate, target ){
+        window.addEventListener('deviceorientation',(e) => {
+
+            const r = e.alpha;
+            const y = e.beta;
+            const x = e.gamma;
+
+            //console.log( r + " " + y + " " + x )
+
+            //console.log(event);
+            delegate.onGetOri( r, x, y, target )
+        })
+    }
+
+    static GetDeviceControlIOS ( delegate, target ) {
 
         if ( typeof( DeviceMotionEvent ) !== "undefined" && typeof( DeviceMotionEvent.requestPermission ) === "function" ) {
             // (optional) Do something before API request prompt.
@@ -98,9 +130,23 @@ export class Utils{
                 .then( response => {
                     // (optional) Do something after API prompt dismissed.
                     if ( response == "granted" ) {
-                        window.addEventListener( "devicemotion", (e) => {
-                            // do something for 'e' here.
-                            console.log(e.acceleration.x + ' m/s2')
+                        
+                        // window.addEventListener( "devicemotion", (e) => {
+                        //     // do something for 'e' here.
+                        //     delegate.onGetAcc(e.acceleration.x, e.acceleration.y)
+                        //     //console.log(e.acceleration.x + ' m/s2')
+                        // })
+
+                        window.addEventListener('deviceorientation',(e) => {
+
+                            const r = e.alpha;
+                            const y = e.beta;
+                            const x = e.gamma;
+
+                            //console.log( r + " " + y + " " + x )
+
+                            //console.log(event);
+                            delegate.onGetOri( r, x, y, target )
                         })
                     }
 

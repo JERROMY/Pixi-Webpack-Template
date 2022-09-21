@@ -6,6 +6,7 @@ import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
 
 import { GameMain } from '../game-main/game-main'
+import { GameSocket } from '../game-main/game-socket'
 
 
 class PixiMain {
@@ -28,11 +29,14 @@ class PixiMain {
     constructor( pixiData ){
 
         gsap.registerPlugin(CustomEase)
-
+        //this.gameSocket = new GameSocket()
         this.pixiData = pixiData
         console.log("Pixi Ready")
         this.initObj()
         this.initEvent()
+
+        
+
         this.onWindowResize()
 
     }
@@ -133,11 +137,13 @@ class PixiMain {
     }
 
     initGameObj(){
-        
-        const game1 = new GameMain(1, this.assetsLoader.resources)
-        this.stage.addChild(game1)
 
-        this.gameStages.push(game1)
+        const gameSocket = new GameSocket()
+        
+        // const game1 = new GameMain(1, this.assetsLoader.resources)
+        // this.stage.addChild(game1)
+
+        // this.gameStages.push(game1)
 
         // const game2 = new GameMain(2, this.assetsLoader.resources)
         // this.stage.addChild(game2)

@@ -11,6 +11,7 @@ import { GameScore } from './game-score'
 import { GameReady } from './game-ready'
 import { GameEnd } from './game-end'
 import { GameBgMove } from './game-bg-move'
+
 import { Char } from './char-main'
 import { Ene } from './ene-main'
 import { EndPage } from './end-page'
@@ -156,6 +157,8 @@ export class GameMain extends PIXI.Container{
 
         this.isFever = false
         this.isReward = false
+
+        
         
     }
 

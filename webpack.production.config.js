@@ -24,6 +24,7 @@ module.exports = {
         'index':'./src/index.js',
         'index-mobile':'./src/index-mobile.js',
         'pixi-data':'./src/pixi-data.js',
+        'game-socket':'./src/components/game-main/game-socket.js'
         
     },
     output: {
@@ -119,7 +120,7 @@ module.exports = {
         new TerserPlugin({
             terserOptions: {
               compress: {
-                drop_console: true
+                drop_console: false
               }
             }
         })

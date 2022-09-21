@@ -16,6 +16,7 @@ export class DeviceContol extends PIXI.Container{
         this.gW = sizes.gW
         this.gH = sizes.gH
 
+
         this.startBtn = new PIXI.Sprite( this.resources["GameStartBtn"].texture )
         this.startBtn.anchor.set( 0.5 )
         this.startBtn.visible = true
@@ -28,14 +29,25 @@ export class DeviceContol extends PIXI.Container{
 
         this.delegate = delegate
 
-        this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        this.startBtn.on( 'tap', this.onStartGameClick )
     
     }
 
     onStartGameClick(){
-        console.log( "Click" )
-        this.alpha -= 0.01
-        //Utils.GetDeviceControl( this.parent.delegat )
+        //console.log( "Click" )
+
+        this.startBtn.visible = false
+        const os = Utils.getMobileOperatingSystem()
+        if( os == "iOS" ){
+            Utils.GetDeviceControlIOS( this.parent.delegate, this.parent.parent )
+        }else if( os == "Android"){
+            Utils.GetDeviceControlAndroid( this.parent.delegate, this.parent.parent )
+        }else{
+            alert( "Not Support" )
+        }
+        //alert( os )
+        //this.alpha -= 0.01
+        //Utils.GetDeviceControl( this.parent.delegate, this.parent.parent )
     }
 
 
