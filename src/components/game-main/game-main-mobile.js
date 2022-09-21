@@ -2,7 +2,9 @@ import { Utils } from './utils'
 
 import gsap from "gsap"
 import CustomEase from 'gsap/CustomEase'
+
 import { GameBall } from './game-ball'
+import { GameSocket } from '../game-main/game-socket'
 import { DeviceContol } from './device-control'
 
 import * as PIXI from 'pixi.js'
@@ -10,7 +12,7 @@ import * as PIXI from 'pixi.js'
 
 export class GameMain extends PIXI.Container{
 
-    constructor(screenID, resources){
+    constructor(screenID, resources, joinGameID){
         super()
         const self = this
 
@@ -37,6 +39,10 @@ export class GameMain extends PIXI.Container{
 
         this.phase = "READY"
 
+        this.socketDelegate = {
+            onJoinGame: self.onJoinGame,
+        }
+
 
         //Device Control
 
@@ -62,7 +68,15 @@ export class GameMain extends PIXI.Container{
         
         console.log(`Game ${ this.screenID } Mobile Ready!`)
 
+        this.joinGameID = joinGameID
+
+        this.gameSocket = new GameSocket( 1, this, this.socketDelegate, this.joinGameID )
+
         
+
+    }
+
+    onJoinGame( gameID, pObj ){
 
     }
 

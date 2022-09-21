@@ -16,6 +16,8 @@ import { Char } from './char-main'
 import { Ene } from './ene-main'
 import { EndPage } from './end-page'
 
+import { GameSocket } from '../game-main/game-socket'
+
 
 export class GameMain extends PIXI.Container{
 
@@ -60,6 +62,10 @@ export class GameMain extends PIXI.Container{
 
         this.gameEndDelegate = {
             onEndGameFadeOut: self.onEndGameFadeOut,
+        }
+
+        this.socketDelegate = {
+            onCreatedGame: self.onCreatedGame,
         }
         //Delegate
 
@@ -135,7 +141,7 @@ export class GameMain extends PIXI.Container{
         //Start Page
         this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.pageDelegate)
         this.addChild( this.startPage )
-        this.startPage.startPageTransitionIn()
+        //this.startPage.startPageTransitionIn()
 
         //Game End
         this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
@@ -158,8 +164,19 @@ export class GameMain extends PIXI.Container{
         this.isFever = false
         this.isReward = false
 
+
+        //Socket Connection
+        this.gameSocket = new GameSocket( 0, this, this.socketDelegate, "" )
         
         
+    }
+
+    onCreatedGame( gameID, pObj ){
+
+        pObj.startPage.randomCode = gameID
+        //console.log( pObj.startPage )
+        pObj.startPage.startPageTransitionIn()
+        console.log( "GameID: " + gameID + " Created" )
     }
 
     initObj(){

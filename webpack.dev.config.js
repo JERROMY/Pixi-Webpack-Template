@@ -6,7 +6,7 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' )
 
-
+const socket = "http://" + "localhost" + ":" + "8080";
 /*
 
 module
@@ -42,20 +42,9 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     mode: 'development',
-    // devServer: {
-    //     host: "192.168.1.123",
-    //     port: 9000,
-    //     static: {
-    //         directory: path.resolve( __dirname, './dist' ),
-    //     },
-    //     devMiddleware: {
-    //         index: 'index.html',
-    //         writeToDisk: true,
-    //     }
-    // },
     devServer: {
-        host: "192.168.1.123",
-        port: 443,
+        //host: "192.168.1.123",
+        port: 9000,
         static: {
             directory: path.resolve( __dirname, './dist' ),
         },
@@ -63,14 +52,32 @@ module.exports = {
             index: 'index.html',
             writeToDisk: true,
         },
-        https: true,
-        https: {
-            key: fs.readFileSync(`localhost+1-key.pem`),
-            cert: fs.readFileSync(`localhost+1.pem`),
-            ca: fs.readFileSync('rootCA.pem'),
-            passphrase: '0937047859',
-        },
+        proxy: {
+            '/socket.io': {
+               target: socket,
+               ws: true
+            },
+          },
+
     },
+    // devServer: {
+    //     // host: "192.168.1.123",
+    //     port: 443,
+    //     static: {
+    //         directory: path.resolve( __dirname, './dist' ),
+    //     },
+    //     devMiddleware: {
+    //         index: 'index.html',
+    //         writeToDisk: true,
+    //     },
+    //     https: true,
+    //     https: {
+    //         key: fs.readFileSync(`localhost+2-key.pem`),
+    //         cert: fs.readFileSync(`localhost+2.pem`),
+    //         ca: fs.readFileSync('rootCA.pem'),
+    //         passphrase: '0937047859',
+    //     },
+    // },
     module: {
         rules:[
             {

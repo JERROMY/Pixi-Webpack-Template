@@ -63,9 +63,17 @@ app.get("/m/",function(req,res){
 const hostID = '';
 const userJoinMap = new Map()
 
+class Game{
+  constructor( gameID, clientID ){
+    this.gameID = gameID
+    this.hostID = clientID
+    this.joinID = ""
+  }
+}
+
 io.on('connection', (socket) => {
 
-    console.log('a user connected: ' + socket.id);
+    console.log('a user connected: ' + socket.id)
   
     /*
   
@@ -80,45 +88,111 @@ io.on('connection', (socket) => {
     */
   
     socket.on('disconnect', () => {
-      console.log('user ' + socket.id + ' disconnected');
-      let dataStr = socket.id + ",";
-      let msgStr = dataStr + '1';
-      sendDataTo(hostID, 'client_leave', msgStr);
+      console.log('user ' + socket.id + ' disconnected' + " Role:" + socket.data.role)
+      const clientID = socket.id
+
+      if( socket.data.role == 0 ){
+        userJoinMap.delete( clientID )
+        //console.log( userJoinMap )
+      }
+
+      let dataStr = socket.id + ","
+      let msgStr = dataStr + '1'
+      //sendDataTo(hostID, 'client_leave', msgStr);
     });
   
-    socket.on('regist_host', (data) => {
-      hostID = socket.id;
-      let dataStr = "";
+    socket.on('regist', (data) => {
+      
+            
+      const role = data;
       let fromID = socket.id;
-      let msgStr = hostID + "," + dataStr;
-      console.log('Host ID:' + socket.id);
-      sendDataTo(socket.id, 'regist_host', msgStr);
+      let msgStr = ""
+      socket.data.role = role
+
+      if( role == 0 ){
+
+
+        const dateTime = Date.now()
+        const timestamp = Math.floor(dateTime).toString()
+
+        const gameID = socket.id + "||" + timestamp
+        const clientID = socket.id
+        msgStr = gameID + "," + clientID + "," + fromID + "," + role
+        
+
+        const game = new Game( gameID, clientID )
+        userJoinMap.set( clientID, game )
+
+        //console.log( userJoinMap )
+      
+      //console.log('Game ID:' + gameID);
+      }else if( role == 1 ){
+
+        const clientID = socket.id;
+        msgStr = clientID + "," + fromID + "," + role
+
+
+      }else{
+
+        msgStr = ""
+      
+      }
+      
+      
+      sendDataTo(socket.id, 'regist', msgStr);
+
     });
+
+    socket.on('join', (data) => {
+            
+      const joinGameID = data;
+      const dataArr = joinGameID.split("||")
+      const hoster = dataArr[0]
+      let fromID = socket.id;
+      let msgStr = fromID 
+
+      if( userJoinMap.has( hoster ) ){
+
+        const joinGame = userJoinMap.get( hoster )
+        joinGame.joinID = fromID
+        
+        console.log( "Has Game: " + hoster )
+        console.log( userJoinMap )
+      
+      }else{
+
+        console.log( "Threre is no Game" )
+
+      }
+
+
+    
+    })
   
     socket.on('send_to_all_clients', (data) => {
-      hostID = socket.id;
-      let dataStr = data;
-      let fromID = socket.id;
-      let msgStr = fromID + "," + dataStr;
-      console.log('Host ID:' + socket.id);
+      hostID = socket.id
+      let dataStr = data
+      let fromID = socket.id
+      let msgStr = fromID + "," + dataStr
+      console.log('Host ID:' + socket.id)
       
-      socket.broadcast.emit("get_msg_from_host", msgStr);
-      sendToAllClients("get_msg_from_host", msgStr);
+      socket.broadcast.emit("get_msg_from_host", msgStr)
+      sendToAllClients("get_msg_from_host", msgStr)
   
   
-    });
+    })
   
     socket.on('regist_client', (data) => {
-      console.log('Client ID:' + socket.id);
-      let dataStr = data;
-      let msgStr = socket.id + "," + dataStr;
+      console.log('Client ID:' + socket.id)
+      let dataStr = data
+      let msgStr = socket.id + "," + dataStr
       
-      //io.sockets.emit("regist_client", msgStr);
-      sendMsgTo(hostID, socket.id, 'regist_client', msgStr);
+      //io.sockets.emit("regist_client", msgStr)
+      sendMsgTo(hostID, socket.id, 'regist_client', msgStr)
     });
   
     socket.on('send_to_host', (data) => {
-      console.log('Send From Client ID:' + socket.id);
+      console.log('Send From Client ID:' + socket.id)
       //let fromID = socket.id;
       //let dataStr = fromID + ',' + data;
   
@@ -127,32 +201,31 @@ io.on('connection', (socket) => {
     });
   
     socket.on('chat_message', (msg) => {
-      console.log('message: ' + msg);
-      io.emit('chat message', msg);
+      console.log('message: ' + msg)
+      io.emit('chat message', msg)
     });
   
 });
 
 function sendToAllClients(event, data){
-    let dataMsg = data;
-    io.broadcast(event, dataMsg);
+    let dataMsg = data
+    io.broadcast(event, dataMsg)
   }
   
   function sendDataTo(userId, event, data){
-  
-    let dataMsg = data;
-    io.to(userId).emit(event, dataMsg);
+    let dataMsg = data
+    io.to(userId).emit(event, dataMsg)
   
   }
 
 if (module === require.main) {
-    const PORT = process.env.PORT || 8080;
+    const PORT = process.env.PORT || 8080
     server.listen(PORT, () => {
-      console.log(`App listening on port ${PORT}`);
-      console.log('Press Ctrl+C to quit.');
+      console.log(`App listening on port ${PORT}`)
+      console.log('Press Ctrl+C to quit.')
     });
 }
 
 //Socket IO
   
-module.exports = server;
+module.exports = server

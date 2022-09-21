@@ -50,6 +50,9 @@ export class StartPage extends PIXI.Container {
 
         //QRCode
         this.randomCode = "1234";
+        this.hostName = location.href
+        this.qrCodeURL = this.hostName + "index-mobile.html" + "?rndCode="
+        
         this.qrcodeSp;
         
 
@@ -94,6 +97,8 @@ export class StartPage extends PIXI.Container {
     startPageTransitionIn(){
         //this.onLogoTransitionIn()
         //gsap.globalTimeline.getChildren().forEach(t => t.kill());
+        this.randomCode = this.qrCodeURL + this.randomCode
+        console.log( this.randomCode  )
         this.startCreateQRCode()
     }
 
@@ -147,8 +152,8 @@ export class StartPage extends PIXI.Container {
     }
 
     startCreateQRCode(){
-        const rndCode = Math.floor( ( Math.random() * 10000 ) ).toString()
-        this.randomCode = rndCode
+        //const rndCode = Math.floor( ( Math.random() * 10000 ) ).toString()
+        //this.randomCode = rndCode
         Utils.createQRCode(this.randomCode, this)
     }
 

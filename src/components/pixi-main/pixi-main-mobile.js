@@ -1,3 +1,4 @@
+import { Utils } from '../game-main/utils'
 
 import * as PIXI from 'pixi.js'
 import AssetsLoader from '../../assetsLoader'
@@ -24,6 +25,19 @@ class PixiMain {
     gameStages = []
 
     constructor( pixiData ){
+
+        // this.joinGameID = Utils.QueryString("rndCode")
+        // console.log( this.joinGameID )
+
+        const url = new URL(location.href);
+        this.joinGameID  = url.searchParams.get("rndCode");
+        if( !this.joinGameID ){
+            alert("There is no Game There!")
+            return
+        }
+
+
+        console.log(this.joinGameID);
 
         gsap.registerPlugin(CustomEase)
 
@@ -133,7 +147,7 @@ class PixiMain {
     initGameObj(){
 
 
-        const game1 = new GameMain(1, this.assetsLoader.resources)
+        const game1 = new GameMain(1, this.assetsLoader.resources, this.joinGameID)
         this.stage.addChild(game1)
 
         this.gameStages.push(game1)

@@ -157,12 +157,14 @@ export class Utils{
     }
         
     static QueryString(name) {
-            var AllVars = window.location.search.substring(1);
-            var Vars = AllVars.split("&");
+            console.log( name )
+            console.log( window.location )
+            const AllVars = window.location.search.substring(1);
+            const Vars = AllVars.split("&");
             for (i = 0; i < Vars.length; i++)
             {
-            var Var = Vars[i].split("=");
-            if (Var[0] == name) return Var[1];
+                const Var = Vars[i].split("=");
+                if (Var[0] == name) return Var[1];
             }
             return "-1";
     }
