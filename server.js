@@ -148,20 +148,31 @@ io.on('connection', (socket) => {
       const joinGameID = data;
       const dataArr = joinGameID.split("||")
       const hoster = dataArr[0]
+      let clientID = socket.id;
       let fromID = socket.id;
-      let msgStr = fromID 
+      let msgStr = "" 
 
       if( userJoinMap.has( hoster ) ){
 
         const joinGame = userJoinMap.get( hoster )
         joinGame.joinID = fromID
+
+        //console.log( "Has Game: " + hoster )
+        //console.log( userJoinMap )
+
+        const role = 0
+        const act = 1
+        msgStr = hoster + "," + fromID + "," + act + "," + role
         
-        console.log( "Has Game: " + hoster )
-        console.log( userJoinMap )
       
       }else{
 
-        console.log( "Threre is no Game" )
+        
+        const role = 0
+        const act = 0
+        msgStr = hoster + "," + fromID + "," + act + "," + role
+        
+        //console.log( "Threre is no Game" )
 
       }
 
