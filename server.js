@@ -41,6 +41,8 @@ const server = http.createServer(app)
 
 let totalGameNum = 4
 let nowEndNum = 0
+const hostID = '';
+const userJoinMap = new Map()
 
 
 
@@ -60,10 +62,13 @@ app.use( '/static', express.static( srcPath ) );
 
 app.get("/",function(req, res){
     
-    const pathToHtmlFile = path.resolve( srcPath, 'index.html' )
-    const contentFromHtmlFile = fs.readFileSync( pathToHtmlFile, 'utf-8' )
+  nowEndNum = 0
+  userJoinMap.clear()
 
-    res.send( contentFromHtmlFile )
+  const pathToHtmlFile = path.resolve( srcPath, 'index.html' )
+  const contentFromHtmlFile = fs.readFileSync( pathToHtmlFile, 'utf-8' )
+
+  res.send( contentFromHtmlFile )
     //res.sendFile(srcPath + '/index.html')
 });
 
@@ -80,8 +85,7 @@ app.get("/m/",function(req,res){
 
 
 //Socket IO
-const hostID = '';
-const userJoinMap = new Map()
+
 
 class Game{
   constructor( gameID, clientID ){
@@ -111,7 +115,7 @@ io.on('connection', (socket) => {
     */
   
     socket.on('disconnect', () => {
-      console.log('user ' + socket.id + ' disconnected' + " Role:" + socket.data.role)
+      // console.log('user ' + socket.id + ' disconnected' + " Role:" + socket.data.role)
       const clientID = socket.id
       let msgStr = ""
       let role = 0
@@ -150,8 +154,10 @@ io.on('connection', (socket) => {
   
     socket.on('regist', (data) => {
       
-            
-      const role = data;
+      let dataStr = data
+      const dataArr = dataStr.split(",")
+      const role = dataArr[0]
+      const screenID = dataArr[1]
       let fromID = socket.id;
       let msgStr = ""
       socket.data.role = role
@@ -174,10 +180,10 @@ io.on('connection', (socket) => {
         const game = new Game( gameID, clientID )
         userJoinMap.set( clientID, game )
 
-        const gameNum = userJoinMap.size
-        game.listNum = gameNum
+        // const gameNum = userJoinMap.size
+        game.listNum = screenID
 
-        msgStr = gameID + "," + clientID + "," + fromID + "," + gameNum + "," + role
+        msgStr = gameID + "," + clientID + "," + fromID + "," + game.listNum + "," + role
 
 
         // console.log( userJoinMap )
@@ -212,23 +218,46 @@ io.on('connection', (socket) => {
       if( userJoinMap.has( hoster ) ){
 
         const joinGame = userJoinMap.get( hoster )
-        joinGame.joinID = fromID
 
-        // console.log( "Has Game: " + hoster )
-        //console.log( userJoinMap )
+        if( joinGame.gameID == joinGameID ){
+          // console.log( "Has Game: " + hoster )
+          //console.log( userJoinMap )
+          
+          joinGame.joinID = clientID
 
-        let role = 0
-        const act = 1
-        msgStr = hoster + "," + fromID + "," + joinGameID + "," + joinGame.listNum + "," + act + "," + role
+          let role = 0
+          const act = 1
+          msgStr = hoster + "," + fromID + "," + joinGameID + "," + joinGame.listNum + "," + act + "," + role
+          
+          socket.data.game = joinGame
 
-        socket.data.game = joinGame
+          sendDataTo(hoster, 'joined', msgStr)
 
-        sendDataTo(hoster, 'joined', msgStr)
+          role = 1
+          msgStr = hoster + "," + fromID + "," + act + "," + role
 
-        role = 1
-        msgStr = hoster + "," + fromID + "," + act + "," + role
+          sendDataTo(fromID, 'joined', msgStr)
+        
+        }else{
 
-        sendDataTo(fromID, 'joined', msgStr)
+          let role = 0
+          const act = 0
+          joinGameID = "none"
+          msgStr = hoster + "," + fromID + "," + joinGameID + "," + act + "," + role
+
+          
+          console.log( "Threre is no Game" + " " + hoster)
+
+          sendDataTo(hoster, 'joined', msgStr)
+
+          role = 1
+          msgStr = hoster + "," + fromID + "," + act + "," + role
+
+          sendDataTo(fromID, 'joined', msgStr)
+
+        }
+
+        
         
       
       }else{
@@ -267,7 +296,8 @@ io.on('connection', (socket) => {
 
         role = 1
         msgStr = game.gameID + "," + game.hostID + "," + game.joinID  + "," + role
-
+        // console.log( "=====" )
+        // console.log( game.joinID )
         sendDataTo(game.joinID, 'start-game', msgStr)
       
       }
@@ -311,7 +341,7 @@ io.on('connection', (socket) => {
         
 
         nowEndNum += 1
-        console.log("End Game Num " + nowEndNum)
+        // console.log("End Game Num " + nowEndNum)
         checkNowEndNum()
 
         
@@ -370,7 +400,7 @@ function checkNowEndNum(){
     nowEndNum = 0
 
 
-    console.log(" Final End " + nowEndNum)
+    // console.log(" Final End " + nowEndNum)
 
     //const msgStr = game.score + "," + game.listNum + "," + game.rank + "," + 1
     //sendDataTo(game.joinID, 'end-game', msgStr)

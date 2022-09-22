@@ -43,7 +43,10 @@ export class GameMain extends PIXI.Container{
         }
 
 
-
+        this.bottomBg = new PIXI.Graphics()
+        this.bottomBg.beginFill(0xffffff)
+        this.bottomBg.drawRect(0, 0, this.gW, this.gH)
+        this.addChild( this.bottomBg )
 
         //console.log(`G W: ${ this.gW } G H: ${ this.gH }`);
         this.addChild( this.bg )
@@ -98,11 +101,19 @@ export class GameMain extends PIXI.Container{
 
 
         //Count Second
-        this.totalTime = 10
+        //this.totalTime = 10
+
+        if (process.env.NODE_ENV === 'production') {
+            this.totalTime = 40
+        }else{
+            this.totalTime = 10
+        }
+
         this.totalTimeMax = this.totalTime
         this.rewardPeriod = 10
         this.rewardCount = 1
-        this.rewardCountMax = 30 / this.rewardPeriod - 1
+        this.rewardCountMax = ( this.totalTimeMax + 30 ) / this.rewardPeriod - 1
+        console.log("Reward Count Max: " + this.rewardCountMax)
         
         this.countingTxt = new PIXI.Text(this.totalTime.toString(), { fontFamily: 'Arial', fontSize: 10, fontWeight: 'bold', fill: '#000000', align: 'center', stroke: '#FFFFFF', strokeThickness: 3 })
         this.countingTxt.anchor.set(0.5)
@@ -110,6 +121,12 @@ export class GameMain extends PIXI.Container{
         this.countingTxt.position.x = this.gW - this.countingTxt.width - 10
         this.countingTxt.position.y = 0 + this.countingTxt.height/2 + 10
         this.addChild(this.countingTxt)
+
+        if (process.env.NODE_ENV === 'production') {
+            this.countingTxt.visible = false
+        }else{
+            this.countingTxt.visible = true
+        }
 
         this.feverTimeMax = 5
         this.feverTime = 0
@@ -183,6 +200,10 @@ export class GameMain extends PIXI.Container{
 
     showEndPage( score, listNum, rank ){
 
+        if(this.gameEnd){
+            this.gameEnd.hideEnd()
+        }
+
         if(this.endPage){
             this.removeChild( this.endPage )
             this.endPage = null
@@ -223,7 +244,13 @@ export class GameMain extends PIXI.Container{
 
         pObj.phase = "END"
         console.log( "Score: " + score + " listNum: " + listNum + " Rank:" + rank + " " + r )
-        pObj.showEndPage( score, listNum, rank )
+        setTimeout(() => {
+
+            pObj.showEndPage( score, listNum, rank )
+
+
+        }, "600")
+        
     }
 
     onJoinedGame( gameID, pObj, r ){

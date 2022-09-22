@@ -20,6 +20,7 @@ export class GameSocket{
             console.log("============ info ===========")
             console.log( this.socket.id )
 
+            const msg = this.role + "," + pObj.screenID
             
             // this.clientID = this.socket.id
             // console.log( "Client ID: " + this.clientID )
@@ -31,7 +32,7 @@ export class GameSocket{
 
             console.log("============ info ===========")
 
-            this.socket.emit( 'regist', this.role )
+            this.socket.emit( 'regist', msg )
             // socket.emit('regist client', 0);
             
         });
@@ -85,11 +86,12 @@ export class GameSocket{
 
                     if( r == 0 ){
 
-                        alert("There is no game match !")
+                        //alert("There is no game match !")
                         //this.delegate.onReCreateGame( this.gameID,  this.pObj )
                         
                     }else if( r == 1 ){
                         
+                        this.socket.disconnect()
                         alert("There is no game match !")
 
                     }else{
@@ -145,6 +147,8 @@ export class GameSocket{
         })
 
         this.socket.on("start-game", (data)=>{
+
+            console.log( "Start Game" )
 
             if( data != "" ){
                 const dataArr = data.split(",")
@@ -217,6 +221,7 @@ export class GameSocket{
     }
 
     startGame(){
+        console.log( this.role )
         this.socket.emit( 'start-game', this.role )
     }
 
@@ -226,8 +231,8 @@ export class GameSocket{
 
 
     registNewGame(){
-
-        this.socket.emit( 'regist', this.role )
+        const msg = this.role + "," + this.pObj.screenID
+        this.socket.emit( 'regist', msg )
     
     }
 

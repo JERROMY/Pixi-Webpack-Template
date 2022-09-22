@@ -31,7 +31,12 @@ export class DeviceContol extends PIXI.Container{
         
 
         //this.startBtn.on( 'tap', this.onStartGameClick )
-        this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        if (process.env.NODE_ENV === 'production') {
+            this.startBtn.on( 'tap', this.onStartGameClick )
+        }else{
+            this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        }
+        
         this.startBtn.visible = false
     
     }
@@ -43,7 +48,12 @@ export class DeviceContol extends PIXI.Container{
         this.visible = false
         this.parent.delegate.onClickStart( this.parent.parent )
         //this.off( 'tap' )
-        this.off( 'pointerdown' )
+        
+        if (process.env.NODE_ENV === 'production') {
+            this.off( 'tap' )
+        }else{
+            this.off( 'pointerdown' )
+        }
 
         const os = Utils.getMobileOperatingSystem()
         if( os == "iOS" ){

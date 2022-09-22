@@ -25,7 +25,15 @@ export class StartPage extends PIXI.Container {
         this.addChild( this.bottomBg )
         this.bottomBg.interactive = true
         this.bottomBg.buttonMode = true
-        this.bottomBg.on( 'pointerdown', this.onBgClick )
+        if (process.env.NODE_ENV === 'production') {
+            
+            
+        }else{
+
+            this.bottomBg.on( 'pointerdown', this.onBgClick )
+            //this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        }
+        
 
         this.bg = new PIXI.Sprite( this.resources["StartPageBg"].texture )
         this.bg.anchor.set( 0.5 )
@@ -51,8 +59,18 @@ export class StartPage extends PIXI.Container {
         //QRCode
         this.randomCode = "1234";
         this.hostName = location.href
+
+        if (process.env.NODE_ENV === 'production') {
+            
+            this.qrCodeURL = this.hostName + "m/" + "?rndCode="
+        }else{
+
+            this.qrCodeURL = this.hostName + "index-mobile.html" + "?rndCode="
+            //this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        }
+
         //this.qrCodeURL = this.hostName + "m/" + "?rndCode="
-        this.qrCodeURL = this.hostName + "index-mobile.html" + "?rndCode="
+        //this.qrCodeURL = this.hostName + "index-mobile.html" + "?rndCode="
         
         this.qrcodeSp;
         

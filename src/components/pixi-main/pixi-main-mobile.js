@@ -62,7 +62,7 @@ class PixiMain {
             antialias: true,
             resolution: 1,
             resizeTo: this.canvasContainer,
-            backgroundColor: 0xFFFFFF
+            backgroundColor: 0x000000
         }
 
         this.app = new PIXI.Application(rendererOptions);
@@ -251,7 +251,7 @@ class PixiMain {
       
         spaceTotal = ( gameStageCount - 1 ) * spaceW
 
-        const sAppH = this.App_Height * 0.9;
+        const sAppH = this.App_Height * 1.0;
       
         if(gameStageCount > 0){
           for(let i = 0 ; i < gameStageCount ; i++){

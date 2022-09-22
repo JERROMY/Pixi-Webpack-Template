@@ -30,6 +30,13 @@ export class GameMain extends PIXI.Container{
             "gW": this.gW,
             "gH": this.gH,
         }
+
+        this.bottomBg = new PIXI.Graphics()
+        this.bottomBg.beginFill(0xffffff)
+        this.bottomBg.drawRect(0, 0, this.gW, this.gH)
+        this.addChild( this.bottomBg )
+
+
         //console.log(`G W: ${ this.gW } G H: ${ this.gH }`);
         this.addChild( this.bg )
 

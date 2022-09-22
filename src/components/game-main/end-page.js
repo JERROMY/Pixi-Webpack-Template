@@ -24,7 +24,16 @@ export class EndPage extends PIXI.Container {
         this.addChild( this.bottomBg )
         this.bottomBg.interactive = true
         this.bottomBg.buttonMode = true
-        this.bottomBg.on( 'pointerdown', this.onBgClick )
+        if (process.env.NODE_ENV === 'production') {
+            
+            //this.startBtn.on( 'tap', this.onStartGameClick )
+        }else{
+
+            this.bottomBg.on( 'pointerdown', this.onBgClick )
+            //this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        }
+
+        
 
         this.bg = new PIXI.Sprite( this.resources["EndPage"].texture )
         this.bg.anchor.set( 0.5 )
