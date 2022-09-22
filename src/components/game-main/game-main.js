@@ -229,7 +229,10 @@ export class GameMain extends PIXI.Container{
     onStartGame( gameID, pObj, r  ){
         console.log( "GameID Main: " + gameID + " Start" )
         console.log( pObj )
-        pObj.startPage.startGame()
+        if( pObj.phase != "START" ){
+            pObj.startPage.startGame()
+        }
+        
     }
 
     onCreatedGame( gameID, listNum, pObj ){
