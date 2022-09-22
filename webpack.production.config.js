@@ -104,7 +104,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: 'index.html',
             chunks: ['index'],
-            title: 'Pixi 2D Web Template',
+            title: 'RTCGame',
             // template: 'src/page-template.hbs',
             description: 'Test 2D Template',
             minify: true,
@@ -112,7 +112,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: 'index-mobile.html',
             chunks: ['index-mobile'],
-            title: 'Pixi 2D Mobile Web Template',
+            title: 'RTCGame Controller',
             // template: 'src/page-template.hbs',
             description: 'Test 2D Mobile Template',
             minify: true,
