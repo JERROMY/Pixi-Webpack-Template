@@ -4,10 +4,9 @@ const app = express()
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const path = require('path');
-const http = require('http')
 
+const https = require('https');
 
-const server = http.createServer(app)
 
 /*
     // const https = require('https');
@@ -23,6 +22,27 @@ const server = http.createServer(app)
     const hscert = fs.readFileSync(certPath);
 
 */
+
+// const keyPath = './localhost+2-key.pem';
+// const certPath = './localhost+2.pem';
+
+// const hskey = fs.readFileSync(keyPath);
+// const hscert = fs.readFileSync(certPath);
+
+// const server = https.createServer({
+//   key: hskey,
+//   cert: hscert
+// }, app);
+
+
+const http = require('http')
+const server = http.createServer(app)
+
+
+let totalGameNum = 4
+let nowEndNum = 0
+
+
 
 // const srcPath = path.join(__dirname, '/dist');
 const srcPath = path.resolve( __dirname, './dist' )
@@ -68,12 +88,15 @@ class Game{
     this.gameID = gameID
     this.hostID = clientID
     this.joinID = ""
+    this.score = 0
+    this.rank = 0
+    this.listNum = 0
   }
 }
 
 io.on('connection', (socket) => {
 
-    console.log('a user connected: ' + socket.id)
+    // console.log('a user connected: ' + socket.id)
   
     /*
   
@@ -90,14 +113,38 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
       console.log('user ' + socket.id + ' disconnected' + " Role:" + socket.data.role)
       const clientID = socket.id
+      let msgStr = ""
+      let role = 0
 
       if( socket.data.role == 0 ){
         userJoinMap.delete( clientID )
         //console.log( userJoinMap )
+      }else if( socket.data.role == 1 ){
+        
+        if( socket.data.game ){
+          
+          const game = socket.data.game
+          role = 0
+          msgStr = game.gameID + "," + game.hostID + "," + game.joinID + "," + role 
+          // console.log( msgStr )
+          
+          sendDataTo(game.hostID, 'gone', msgStr)
+
+          game.joinID = ""
+          socket.data.game = null
+        }
+
+        
+        
+
+        //console.log( userJoinMap )
+
+      }else{
+
       }
 
-      let dataStr = socket.id + ","
-      let msgStr = dataStr + '1'
+      //let dataStr = socket.id + ","
+      //let msgStr = dataStr + '1'
       //sendDataTo(hostID, 'client_leave', msgStr);
     });
   
@@ -109,21 +156,31 @@ io.on('connection', (socket) => {
       let msgStr = ""
       socket.data.role = role
 
-      if( role == 0 ){
+      
 
+      if( role == 0 ){
 
         const dateTime = Date.now()
         const timestamp = Math.floor(dateTime).toString()
 
         const gameID = socket.id + "||" + timestamp
         const clientID = socket.id
-        msgStr = gameID + "," + clientID + "," + fromID + "," + role
         
-
+        if( userJoinMap.has( clientID ) ){
+          userJoinMap.delete( clientID )
+        }
+        
+        
         const game = new Game( gameID, clientID )
         userJoinMap.set( clientID, game )
 
-        //console.log( userJoinMap )
+        const gameNum = userJoinMap.size
+        game.listNum = gameNum
+
+        msgStr = gameID + "," + clientID + "," + fromID + "," + gameNum + "," + role
+
+
+        // console.log( userJoinMap )
       
       //console.log('Game ID:' + gameID);
       }else if( role == 1 ){
@@ -139,16 +196,16 @@ io.on('connection', (socket) => {
       }
       
       
-      sendDataTo(socket.id, 'regist', msgStr);
+      sendDataTo(socket.id, 'regist', msgStr)
 
     });
 
     socket.on('join', (data) => {
             
-      const joinGameID = data;
+      let joinGameID = data;
       const dataArr = joinGameID.split("||")
       const hoster = dataArr[0]
-      let clientID = socket.id;
+      let clientID = socket.id
       let fromID = socket.id;
       let msgStr = "" 
 
@@ -157,28 +214,117 @@ io.on('connection', (socket) => {
         const joinGame = userJoinMap.get( hoster )
         joinGame.joinID = fromID
 
-        //console.log( "Has Game: " + hoster )
+        // console.log( "Has Game: " + hoster )
         //console.log( userJoinMap )
 
-        const role = 0
+        let role = 0
         const act = 1
+        msgStr = hoster + "," + fromID + "," + joinGameID + "," + joinGame.listNum + "," + act + "," + role
+
+        socket.data.game = joinGame
+
+        sendDataTo(hoster, 'joined', msgStr)
+
+        role = 1
         msgStr = hoster + "," + fromID + "," + act + "," + role
+
+        sendDataTo(fromID, 'joined', msgStr)
         
       
       }else{
 
         
-        const role = 0
+        let role = 0
         const act = 0
-        msgStr = hoster + "," + fromID + "," + act + "," + role
+        joinGameID = "none"
+        msgStr = hoster + "," + fromID + "," + joinGameID + "," + act + "," + role
+
         
-        //console.log( "Threre is no Game" )
+        console.log( "Threre is no Game" + " " + hoster)
+
+        sendDataTo(hoster, 'joined', msgStr)
+
+        role = 1
+        msgStr = hoster + "," + fromID + "," + act + "," + role
+
+        sendDataTo(fromID, 'joined', msgStr)
 
       }
 
 
     
     })
+
+    socket.on('start-game', (data) => {
+      
+      //console.log( socket.data.game )
+      if( socket.data.game ){
+        const game = socket.data.game
+        let role = 0
+        msgStr = game.gameID + "," + game.hostID + "," + game.joinID  + "," + role
+
+        sendDataTo(game.hostID, 'start-game', msgStr)
+
+        role = 1
+        msgStr = game.gameID + "," + game.hostID + "," + game.joinID  + "," + role
+
+        sendDataTo(game.joinID, 'start-game', msgStr)
+      
+      }
+    
+    
+    })
+
+    socket.on('update-game', (data) => {
+      
+      //console.log( socket.data.game )
+      if( socket.data.game ){
+        const game = socket.data.game
+        let role = 0
+        const msgStr = data + "," + role
+
+        sendDataTo(game.hostID, 'update-game', msgStr)
+
+      
+      }
+    
+    
+    })
+
+    socket.on('update-status', (data) => {
+      
+      //console.log( socket.data.game )
+      
+    
+    
+    })
+
+    socket.on('end-game', (data) => {
+      
+      //console.log( socket.data.game )
+      //console.log( "End Game Main" )
+      const hoster = socket.id
+      if( userJoinMap.has( hoster ) ){
+        const game = userJoinMap.get( hoster )
+        game.score = data
+
+        
+
+        nowEndNum += 1
+        console.log("End Game Num " + nowEndNum)
+        checkNowEndNum()
+
+        
+
+      }
+
+      
+      
+    
+    
+    })
+
+    
   
     socket.on('send_to_all_clients', (data) => {
       hostID = socket.id
@@ -217,6 +363,48 @@ io.on('connection', (socket) => {
     });
   
 });
+
+function checkNowEndNum(){
+  if(nowEndNum >= totalGameNum){
+
+    nowEndNum = 0
+
+
+    console.log(" Final End " + nowEndNum)
+
+    //const msgStr = game.score + "," + game.listNum + "," + game.rank + "," + 1
+    //sendDataTo(game.joinID, 'end-game', msgStr)
+
+    // console.log( userJoinMap )
+
+    const rankGameMap = new Map([...userJoinMap.entries()].sort((a, b) => b[1].score - a[1].score));
+    
+    let msgStr = ""
+    let totalNum = 0
+    for (const [key, obj] of rankGameMap) {
+
+      totalNum += 1
+      const game = obj
+      game.rank = totalNum
+
+      // console.log( game.rank )
+
+      msgStr = game.score + "," + game.listNum + "," + game.rank + "," + 0
+      sendDataTo(game.hostID, 'end-game', msgStr)
+
+      msgStr = game.score + "," + game.listNum + "," + game.rank + "," + 1
+      sendDataTo(game.joinID, 'end-game', msgStr)
+      
+
+    }
+
+    
+
+
+
+  }
+
+}
 
 function sendToAllClients(event, data){
     let dataMsg = data

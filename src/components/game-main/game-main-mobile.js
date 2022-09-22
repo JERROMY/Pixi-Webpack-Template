@@ -6,6 +6,8 @@ import CustomEase from 'gsap/CustomEase'
 import { GameBall } from './game-ball'
 import { GameSocket } from '../game-main/game-socket'
 import { DeviceContol } from './device-control'
+import { GameEnd } from './game-end'
+import { EndPage } from './end-page'
 
 import * as PIXI from 'pixi.js'
 
@@ -40,7 +42,9 @@ export class GameMain extends PIXI.Container{
         this.phase = "READY"
 
         this.socketDelegate = {
-            onJoinGame: self.onJoinGame,
+            onJoinedGame: self.onJoinedGame,
+            onStartGame: self.onStartGame,
+            onEndGame: self.onEndGame,
         }
 
 
@@ -49,10 +53,20 @@ export class GameMain extends PIXI.Container{
         this.deviceControlDelegate = {
             onGetAcc: self.onGetAcc,
             onGetOri: self.onGetOri,
+            onClickStart: self.onClickStart
         }
+
+        this.pageDelegate = {
+            onPageTransitionIn: self.onPageTransitionIn,
+            onPageTransitionOut: self.onPageTransitionOut,
+        }
+        
 
         this.deviceControl = new DeviceContol( this.screenID, this.resources, this.sizes, this.deviceControlDelegate )
         this.addChild(  this.deviceControl )
+
+         //End Page
+        this.endPage = null
 
         //Device Control
 
@@ -76,8 +90,76 @@ export class GameMain extends PIXI.Container{
 
     }
 
-    onJoinGame( gameID, pObj ){
+    showEndPage( score, listNum, rank ){
 
+        if(this.endPage){
+            this.removeChild( this.endPage )
+            this.endPage = null
+        }
+
+        this.endPage = new EndPage( this.screenID, this.resources, this.sizes, this.pageDelegate )
+        this.addChild( this.endPage )
+
+        this.endPage.visible = true
+        this.endPage.isMobile = true
+        this.endPage.startPageTransitionIn( score, listNum, rank )
+        
+    }
+
+    onPageTransitionIn( page ){
+        console.log( `Page Name: ${ page.pageName }` )
+    }
+
+    onPageTransitionOut( page ){
+        console.log( `Page Name: ${ page.pageName }` )
+        // console.log( this )
+        const pObj = page.parent
+        //pObj.removeChild( page )
+        page.visible = false
+        page.alpha = 0
+        
+        
+        switch ( page.pageName ) {
+           
+            case "EndPage":
+
+                pObj.restartGame()
+                //pObj.endPage = null
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    onClickStart( pObj ){
+        console.log( "Click Start" )
+        pObj.gameSocket.startGame()
+        
+    }
+
+    onEndGame( score, listNum, rank, r, pObj ){
+
+        pObj.phase = "END"
+        console.log( "Score: " + score + " listNum: " + listNum + " Rank:" + rank + " " + r )
+        pObj.showEndPage( score, listNum, rank )
+    }
+
+    onStartGame( gameID, pObj, r  ){
+        console.log( "GameID Mobile: " + gameID + " Start" )
+        pObj.phase = "START"
+        pObj.initEvent()
+    }
+
+    onJoinedGame( gameID, pObj, r ){
+        console.log( "GameID: " + gameID + " Joined" )
+        if( r == 0 ){
+            
+        } else if( r == 1 ) {
+            pObj.deviceControl.startBtn.visible = true
+        } else {
+            
+        }
     }
 
     onGetAcc( xVal, yVal ){
@@ -93,10 +175,15 @@ export class GameMain extends PIXI.Container{
 
         parent.ball.update( diffX )
 
+
+
         parent.tempX = xVal
 
-        //const 
-        //console.log( r + " " + xVal + " " + yVal )
+        if( parent.phase == "START" ){
+            parent.gameSocket.updateGame( parent.ball.position.x )
+        }
+
+        
     }
 
     updateGame(deltaTime){
@@ -109,6 +196,36 @@ export class GameMain extends PIXI.Container{
         //this.ball.position.y = 0;
     }
 
+    initEvent(){
+        this.interactive = true;
+        this.on('pointermove', this.onPointMove)
+    }
+
+    offEvent(){
+        this.off('pointermove', this.onPointMove)
+    }
+
+    onPointMove(e){
+        //console.log(e);
+        //console.log(e.global);
+
+        const localPosi = new PIXI.Point()
+
+        const globalPosi = e.data.global
+
+        this.toLocal(globalPosi ,this.parent, localPosi)
+        //console.log(`G: ${ localPosi.x } ${ localPosi.y }`);
+        if(localPosi.x <= 0 || localPosi.x >= this.gW){
+            return
+        }
+        this.ball.position.x = localPosi.x
+
+        if( this.phase == "START" ){
+            this.gameSocket.updateGame( this.ball.position.x )
+        }
+        
+    }
+
     resizeGame(aW, aH){
 
         const percentScale = aH / this.gH
@@ -118,6 +235,8 @@ export class GameMain extends PIXI.Container{
         
 
     }
+
+
 
 
 }

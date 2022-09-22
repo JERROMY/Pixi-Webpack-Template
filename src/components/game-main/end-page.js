@@ -103,6 +103,8 @@ export class EndPage extends PIXI.Container {
         
         this.alpha = 0
         this.targetScore = 0
+
+        this.isMobile = false
     
     }
 
@@ -184,16 +186,31 @@ export class EndPage extends PIXI.Container {
     onTransitionInComplete( pObj ){
         pObj.startLogoAnimation()
         pObj.setGameScore( pObj.score )
+
+        if( !pObj.isMobile ){
+            setTimeout(() => {
+
+                pObj.startPageTransitionOut()
+    
+    
+            }, "5000")
+        }
+
+        
+
+
     }
 
     //Page
 
-    startPageTransitionIn( score ){
+    startPageTransitionIn( score, listNum, rank ){
 
         //gsap.globalTimeline.getChildren().forEach(t => t.kill());
         this.score = 0
+        this.playerTxt.text = `PLAYER ${ ( parseInt( listNum ) ) }`
         this.setScore( this.score )
         this.targetScore = score
+        this.setRank( rank )
         this.onLogoTransitionIn()
     }
 

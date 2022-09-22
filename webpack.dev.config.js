@@ -7,6 +7,7 @@ const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' )
 
 const socket = "http://" + "localhost" + ":" + "8080";
+//const socket = "https://" + "localhost" +  ":" + "8444";
 /*
 
 module

@@ -41,6 +41,10 @@ export class GameMain extends PIXI.Container{
             "gW": this.gW,
             "gH": this.gH,
         }
+
+
+
+
         //console.log(`G W: ${ this.gW } G H: ${ this.gH }`);
         this.addChild( this.bg )
 
@@ -65,7 +69,12 @@ export class GameMain extends PIXI.Container{
         }
 
         this.socketDelegate = {
+            onReCreateGame: self.onReCreateGame,
             onCreatedGame: self.onCreatedGame,
+            onJoinedGame: self.onJoinedGame,
+            onStartGame: self.onStartGame,
+            onUpdateGame: self.onUpdateGame,
+            onEndGame: self.onEndGame,
         }
         //Delegate
 
@@ -89,7 +98,7 @@ export class GameMain extends PIXI.Container{
 
 
         //Count Second
-        this.totalTime = 30
+        this.totalTime = 10
         this.totalTimeMax = this.totalTime
         this.rewardPeriod = 10
         this.rewardCount = 1
@@ -107,7 +116,7 @@ export class GameMain extends PIXI.Container{
 
         
 
-        this.phase = "READY"
+        this.phase = ""
         //Count Second
 
         this.gameBgMove = new GameBgMove( this.screenID, this.resources, this.sizes, null )
@@ -144,14 +153,15 @@ export class GameMain extends PIXI.Container{
         //this.startPage.startPageTransitionIn()
 
         //Game End
-        this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
-        this.addChild( this.gameEnd )
+        // this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
+        // this.addChild( this.gameEnd )
+        this.gameEnd = null
 
        //End Page
-       this.endPage = new EndPage( this.screenID, this.resources, this.sizes, this.pageDelegate )
-       this.addChild( this.endPage )
-       this.endPage.visible = false
-        
+       //this.endPage = new EndPage( this.screenID, this.resources, this.sizes, this.pageDelegate )
+       //this.addChild( this.endPage )
+       ///this.endPage.visible = false
+       this.endPage = null
 
         console.log(`Game ${ this.screenID } Ready!`)
 
@@ -171,12 +181,86 @@ export class GameMain extends PIXI.Container{
         
     }
 
-    onCreatedGame( gameID, pObj ){
+    showEndPage( score, listNum, rank ){
+
+        if(this.endPage){
+            this.removeChild( this.endPage )
+            this.endPage = null
+        }
+
+        this.endPage = new EndPage( this.screenID, this.resources, this.sizes, this.pageDelegate )
+        this.addChild( this.endPage )
+        this.endPage.visible = true
+        this.endPage.isMobile = false
+
+        this.endPage.startPageTransitionIn( score, listNum, rank )
+    }
+
+    onUpdateGame( x, pObj, r ){
+        //console.log( "update" )
+        if( pObj.phase == "START" ){
+            const xNum = parseFloat( x )
+            pObj.updateCharPosi( xNum )
+        }
+
+    }
+
+    onStartGame( gameID, pObj, r  ){
+        console.log( "GameID Main: " + gameID + " Start" )
+        console.log( pObj )
+        pObj.startPage.startGame()
+    }
+
+    onCreatedGame( gameID, listNum, pObj ){
 
         pObj.startPage.randomCode = gameID
         //console.log( pObj.startPage )
-        pObj.startPage.startPageTransitionIn()
+        pObj.startPage.startPageTransitionIn( listNum )
         console.log( "GameID: " + gameID + " Created" )
+    }
+
+    onEndGame( score, listNum, rank, r, pObj ){
+
+        pObj.phase = "END"
+        console.log( "Score: " + score + " listNum: " + listNum + " Rank:" + rank + " " + r )
+        pObj.showEndPage( score, listNum, rank )
+    }
+
+    onJoinedGame( gameID, pObj, r ){
+        console.log( "GameID: " + gameID + " Joined" )
+        if( r == 0 ){
+            pObj.startPage.onStartButtonTransitionIn()
+        } else if( r == 1 ) {
+
+        } else {
+
+        }
+    }
+
+    reCreateStartPage(){
+
+        console.log( this )
+        if(this.startPage){
+            this.removeChild( this.startPage )
+            this.startPage = null
+        }
+        this.startPage = new StartPage(this.screenID, this.resources, this.sizes, this.pageDelegate)
+        this.addChild( this.startPage )
+
+        this.gameSocket.registNewGame()
+
+        //this.startPage.startPageTransitionIn()
+
+    }
+
+    onReCreateGame( gameID, pObj, r ){
+        console.log("Recreate Game: " + gameID)
+        if(pObj.phase == "READY"){
+            pObj.reCreateStartPage()
+        }else if(pObj.phase == "START"){
+            
+        }
+        
     }
 
     initObj(){
@@ -207,7 +291,12 @@ export class GameMain extends PIXI.Container{
         if(localPosi.x <= 0 || localPosi.x >= this.gW){
             return
         }
-        this.char.position.x = localPosi.x
+        //this.char.position.x = localPosi.x
+        this.updateCharPosi( localPosi.x )
+    }
+
+    updateCharPosi( xPosi ){
+        this.char.position.x = xPosi
     }
 
     onQRCodeClick(){
@@ -225,12 +314,14 @@ export class GameMain extends PIXI.Container{
     }
 
     onPageTransitionOut( page ){
-        console.log( `Page Name: ${ page.pageName }` )
+        //console.log( `Page Name: ${ page.pageName }` )
         // console.log( this )
         const pObj = page.parent
         //pObj.removeChild( page )
         page.visible = false
         page.alpha = 0
+
+        //console.log( pObj )
         
         //console.log( gsap.globalTimeline.getChildren() )
         //gsap.globalTimeline.getChildren().forEach(t => t.kill());
@@ -278,7 +369,7 @@ export class GameMain extends PIXI.Container{
         }
         this.char.setCharStauts("normal")
         this.char.hitDuration = 0
-        this.phase = "READY"
+        
         this.feverTimeMax = 5
         this.feverTime = 0
         this.rewardCount = 1
@@ -289,23 +380,36 @@ export class GameMain extends PIXI.Container{
         this.score = 0
         this.eneTickCount = 0
         this.recoverEffect()
-        this.startPage.visible = true
-        this.startPage.alpha = 0
-        this.startPage.startPageTransitionIn()
+
+        this.reCreateStartPage()
+
+        
+        
     }
 
     endGame(){
         console.log("Game End !")
         this.offEvent()
         this.clearAllEne()
+        
+        if( this.gameEnd ){
+            this.removeChild( this.gameEnd )
+            this.gameEnd = null
+        }
+
+        this.gameEnd = new GameEnd( this.screenID, this.resources, this.sizes, this.gameEndDelegate )
+        this.addChild( this.gameEnd )
+        this.gameEnd.visible = true
+        
         this.gameEnd.showEnd()
         
 
     }
 
     onEndGameFadeOut( pObj ){
-        pObj.parent.endPage.visible = true
-        pObj.parent.endPage.startPageTransitionIn( pObj.parent.score )
+        pObj.parent.gameSocket.endGame( pObj.parent.score )
+        //pObj.parent.endPage.visible = true
+        //pObj.parent.endPage.startPageTransitionIn( pObj.parent.score, pObj.parent.gameSocket.listNum, pObj.parent.gameSocket.rank )
     }
 
     updateGame2(deltaTime){

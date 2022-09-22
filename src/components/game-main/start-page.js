@@ -51,6 +51,7 @@ export class StartPage extends PIXI.Container {
         //QRCode
         this.randomCode = "1234";
         this.hostName = location.href
+        //this.qrCodeURL = this.hostName + "m/" + "?rndCode="
         this.qrCodeURL = this.hostName + "index-mobile.html" + "?rndCode="
         
         this.qrcodeSp;
@@ -94,11 +95,12 @@ export class StartPage extends PIXI.Container {
 
     //Page
 
-    startPageTransitionIn(){
+    startPageTransitionIn( listNum ){
         //this.onLogoTransitionIn()
         //gsap.globalTimeline.getChildren().forEach(t => t.kill());
+        this.playerTxt.text = `PLAYER ${  ( parseInt( listNum ) ) }`
         this.randomCode = this.qrCodeURL + this.randomCode
-        console.log( this.randomCode  )
+        //console.log( this.randomCode  )
         this.startCreateQRCode()
     }
 
@@ -174,9 +176,11 @@ export class StartPage extends PIXI.Container {
 
     onQRCodeClick(){
         const pObj = this.parent
-
+        console.log( pObj.randomCode )
         this.off( 'pointerdown' )
-        pObj.onStartButtonTransitionIn();
+        Utils.redirect_blank( pObj.randomCode )
+        //window.location.href = this.randomCode
+        //pObj.onStartButtonTransitionIn();
 
     }
 
@@ -222,6 +226,10 @@ export class StartPage extends PIXI.Container {
     onStartGameClick(){
         this.parent.startPageTransitionOut();
     }
+    
+    startGame(){
+        this.startPageTransitionOut();
+    }
 
     onStartButtonTransitionIn(){
 
@@ -248,6 +256,7 @@ export class StartPage extends PIXI.Container {
     onStartGameTransitionInComplete( pObj ){
 
         pObj.qrcodeSp.visible = false
+        pObj.parent.phase = "READY"
         pObj.initStartBtnEvent()
         pObj.startPlayerTxtAnimation()
     }

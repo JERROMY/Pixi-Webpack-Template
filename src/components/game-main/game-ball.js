@@ -18,7 +18,7 @@ export class GameBall extends PIXI.Container {
         this.gH = sizes.gH
         this.delegate = delegate
 
-        this.ball = new PIXI.Sprite( this.resources[ "Ball" ].texture )
+        this.ball = new PIXI.Sprite( this.resources[ "Char1" ].texture )
         this.ball.anchor.set( 0.5 )
         this.addChild( this.ball )
 

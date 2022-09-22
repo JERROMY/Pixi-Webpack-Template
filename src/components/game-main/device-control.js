@@ -28,26 +28,32 @@ export class DeviceContol extends PIXI.Container{
         this.position.set( this.gW/2, this.gH/2 )
 
         this.delegate = delegate
+        
 
-        this.startBtn.on( 'tap', this.onStartGameClick )
+        //this.startBtn.on( 'tap', this.onStartGameClick )
+        this.startBtn.on( 'pointerdown', this.onStartGameClick )
+        this.startBtn.visible = false
     
     }
 
     onStartGameClick(){
         //console.log( "Click" )
+        //console.log( this )
 
-        this.startBtn.visible = false
+        this.visible = false
+        this.parent.delegate.onClickStart( this.parent.parent )
+        //this.off( 'tap' )
+        this.off( 'pointerdown' )
+
         const os = Utils.getMobileOperatingSystem()
         if( os == "iOS" ){
             Utils.GetDeviceControlIOS( this.parent.delegate, this.parent.parent )
         }else if( os == "Android"){
             Utils.GetDeviceControlAndroid( this.parent.delegate, this.parent.parent )
         }else{
-            alert( "Not Support" )
+            //alert( "Not Support" )
         }
-        //alert( os )
-        //this.alpha -= 0.01
-        //Utils.GetDeviceControl( this.parent.delegate, this.parent.parent )
+        
     }
 
 

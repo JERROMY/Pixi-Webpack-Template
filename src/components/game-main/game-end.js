@@ -52,7 +52,9 @@ export class GameEnd extends PIXI.Container {
     }
 
     onEndGameSpFadeOut( pObj ){
+
         pObj.delegate.onEndGameFadeOut( pObj )
+        
     }
 
 }

@@ -20,7 +20,7 @@ class PixiMain {
     stage
     loadingTxt
 
-    assetsLoader;
+    assetsLoader
     alDelegate
     gameStages = []
 
@@ -43,6 +43,7 @@ class PixiMain {
 
         this.pixiData = pixiData
         console.log("Pixi Mobile Ready")
+        
         this.initObj()
         this.initEvent()
         this.onWindowResize()

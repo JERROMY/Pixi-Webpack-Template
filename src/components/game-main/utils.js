@@ -169,6 +169,13 @@ export class Utils{
             return "-1";
     }
 
+    static redirect_blank(url) {
+        const a = document.createElement('a');
+        a.target="_blank";
+        a.href=url;
+        a.click();
+      }
+
 
 
 }
