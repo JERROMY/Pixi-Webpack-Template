@@ -106,7 +106,7 @@ export class GameMain extends PIXI.Container{
         if (process.env.NODE_ENV === 'production') {
             this.totalTime = 40
         }else{
-            this.totalTime = 10
+            this.totalTime = 20
         }
 
         this.totalTimeMax = this.totalTime
@@ -133,7 +133,7 @@ export class GameMain extends PIXI.Container{
 
         
 
-        this.phase = ""
+        this.phase = "READY"
         //Count Second
 
         this.gameBgMove = new GameBgMove( this.screenID, this.resources, this.sizes, null )
@@ -229,7 +229,8 @@ export class GameMain extends PIXI.Container{
     onStartGame( gameID, pObj, r  ){
         console.log( "GameID Main: " + gameID + " Start" )
         console.log( pObj )
-        if( pObj.phase != "START" ){
+        if( pObj.phase == "READY" ){
+            console.log( "Start Again: " + gameID + " Start" )
             pObj.startPage.startGame()
         }
         
@@ -245,7 +246,7 @@ export class GameMain extends PIXI.Container{
 
     onEndGame( score, listNum, rank, r, pObj ){
 
-        pObj.phase = "END"
+        
         console.log( "Score: " + score + " listNum: " + listNum + " Rank:" + rank + " " + r )
         setTimeout(() => {
 
@@ -258,13 +259,26 @@ export class GameMain extends PIXI.Container{
 
     onJoinedGame( gameID, pObj, r ){
         console.log( "GameID: " + gameID + " Joined" )
-        if( r == 0 ){
-            pObj.startPage.onStartButtonTransitionIn()
-        } else if( r == 1 ) {
 
-        } else {
+        pObj.gameSocket.timeEvent(pObj.phase)
+        if(pObj.isFever){
+            pObj.gameSocket.timeEvent("FEVER")
+        }else{
+            pObj.gameSocket.timeEvent("FEVER-OUT")
+        }
+
+        if( pObj.phase == "READY" ){
+
+            if( r == 0 ){
+                pObj.startPage.onStartButtonTransitionIn()
+            } else if( r == 1 ) {
+    
+            } else {
+    
+            }
 
         }
+        
     }
 
     reCreateStartPage(){
@@ -399,7 +413,7 @@ export class GameMain extends PIXI.Container{
         }
         this.char.setCharStauts("normal")
         this.char.hitDuration = 0
-        
+        this.phase = "READY"
         this.feverTimeMax = 5
         this.feverTime = 0
         this.rewardCount = 1
@@ -418,7 +432,9 @@ export class GameMain extends PIXI.Container{
     }
 
     endGame(){
+        this.phase = "END"
         console.log("Game End !")
+        this.gameSocket.timeEvent("END")
         this.offEvent()
         this.clearAllEne()
         
@@ -479,6 +495,8 @@ export class GameMain extends PIXI.Container{
                 if( ! this.isReward ){
                     this.isReward = true
                     //console.log( this.isReward )
+                    
+
                     this.rewardCount += 1
                 }
                 
@@ -520,6 +538,7 @@ export class GameMain extends PIXI.Container{
                 if( this.feverTime >= this.feverTimeMax ){
                     this.feverTime = 0
                     this.isFever = false
+                    this.gameSocket.timeEvent("FEVER-OUT")
                     this.recoverEffect()
                 }
             }
@@ -624,6 +643,7 @@ export class GameMain extends PIXI.Container{
                 pObj.score += scoreNum
                 pObj.char.setCharStauts( "hit" )
                 pObj.isFever = true
+                pObj.gameSocket.timeEvent("FEVER")
                 pObj.feverEffect()
             }
         }else{

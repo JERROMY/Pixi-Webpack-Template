@@ -208,8 +208,11 @@ class PixiMain {
         if( gameStageCount > 0 ){
             for(let i = 0 ; i < gameStageCount ; i++){
                 const gameStage = this.gameStages[i];
+
+                gameStage.updateGame( deltaTime );
+
                 if(gameStage.phase == "START"){
-                    gameStage.updateGame( deltaTime );
+                    
                 }else{
                     //gameStage.updateGame2( deltaTime );
                 }

@@ -274,7 +274,7 @@ export class StartPage extends PIXI.Container {
     onStartGameTransitionInComplete( pObj ){
 
         pObj.qrcodeSp.visible = false
-        pObj.parent.phase = "READY"
+        //pObj.parent.phase = "READY"
         pObj.initStartBtnEvent()
         pObj.startPlayerTxtAnimation()
     }

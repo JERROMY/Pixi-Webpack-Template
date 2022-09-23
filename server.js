@@ -354,6 +354,23 @@ io.on('connection', (socket) => {
     
     })
 
+    socket.on('time-event', (data) => {
+      
+      //console.log( socket.data.game )
+      //console.log( "End Game Main" )
+      const hoster = socket.id
+      if( userJoinMap.has( hoster ) ){
+        
+        const game = userJoinMap.get( hoster )
+        const eventName = data
+        
+        sendDataTo(game.joinID, "time-event", eventName)
+
+      }
+    
+    
+    })
+
     
   
     socket.on('send_to_all_clients', (data) => {

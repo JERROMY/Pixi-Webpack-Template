@@ -25,9 +25,25 @@ export class DeviceContol extends PIXI.Container{
         this.addChild( this.startBtn )
         //this.startBtn.off( 'pointerdown' )
 
-        this.position.set( this.gW/2, this.gH/2 )
+        this.position.set( this.gW/2, this.gH/2 - 100 )
 
         this.delegate = delegate
+
+
+        this.leftArr = new PIXI.Sprite( this.resources["arrLeft"].texture )
+        this.leftArr.anchor.set( 0.5 )
+        this.leftArr.position.x = -this.gW/2 + this.leftArr.width/2 + 10
+        this.leftArr.scale.set( 0.5 )
+        this.addChild( this.leftArr )
+
+        this.rightArr = new PIXI.Sprite( this.resources["arrRight"].texture )
+        this.rightArr.anchor.set( 0.5 )
+        this.rightArr.position.x = this.gW/2 - this.rightArr.width/2 - 10
+        this.rightArr.scale.set( 0.5 )
+        this.addChild( this.rightArr )
+
+        this.leftArr.visible = false
+        this.rightArr.visible = false
         
 
         //this.startBtn.on( 'tap', this.onStartGameClick )
@@ -48,6 +64,7 @@ export class DeviceContol extends PIXI.Container{
         this.visible = false
         this.parent.delegate.onClickStart( this.parent.parent )
         //this.off( 'tap' )
+        
         
         if (process.env.NODE_ENV === 'production') {
             this.off( 'tap' )

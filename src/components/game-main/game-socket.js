@@ -161,6 +161,20 @@ export class GameSocket{
 
         })
 
+        this.socket.on("time-event", (data)=>{
+
+            console.log( "Time Event" )
+
+            if( data != "" ){
+                
+                const eventName = data
+                
+                this.delegate.onTimeEvent( eventName, this.pObj )
+            
+            }
+
+        })
+
         this.socket.on("update-game", (data)=>{
 
             if( data != "" ){
@@ -239,6 +253,12 @@ export class GameSocket{
     updateGame( xPosi ){
 
         this.socket.emit( 'update-game', xPosi )
+    
+    }
+
+    timeEvent( eventName ){
+
+        this.socket.emit( 'time-event', eventName )
     
     }
 

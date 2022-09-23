@@ -43,6 +43,13 @@ export class GameMain extends PIXI.Container{
         this.ball = new GameBall( this.screenID, this.resources, this.sizes, null )
         this.addChild( this.ball )
 
+        this.feverSp = new PIXI.Sprite( this.resources[ "fever" ].texture )
+        this.feverSp.anchor.set( 0.5 )
+        this.feverSp.position.x = this.gW/2
+        this.feverSp.position.y = this.gH/2 - 100
+        this.feverSp.visible = false
+        this.addChild( this.feverSp )
+
         this.tempX = 0
         
 
@@ -52,6 +59,7 @@ export class GameMain extends PIXI.Container{
             onJoinedGame: self.onJoinedGame,
             onStartGame: self.onStartGame,
             onEndGame: self.onEndGame,
+            onTimeEvent: self.onTimeEvent,
         }
 
 
@@ -78,6 +86,8 @@ export class GameMain extends PIXI.Container{
         //Device Control
 
 
+
+
         //Mask
         this.maskGraphic = new PIXI.Graphics()
         this.maskGraphic.beginFill(0xffffff)
@@ -90,6 +100,9 @@ export class GameMain extends PIXI.Container{
         console.log(`Game ${ this.screenID } Mobile Ready!`)
 
         this.joinGameID = joinGameID
+
+        this.isFever = false
+        this.isClick = false
 
         this.gameSocket = new GameSocket( 1, this, this.socketDelegate, this.joinGameID )
 
@@ -139,8 +152,24 @@ export class GameMain extends PIXI.Container{
         }
     }
 
+    onTimeEvent( eventName, pObj ){
+        //console.log( eventName )
+        if( eventName == "FEVER"){
+            pObj.isFever = true
+        }else if( eventName == "FEVER-OUT"){
+            pObj.isFever = false
+        }else if( eventName == "END" ){
+            pObj.phase = "END"
+        }else if( eventName == "READY" ){
+            pObj.phase = "READY"
+        }else if( eventName == "START" ){
+            pObj.phase = "START"
+        }
+    }
+
     onClickStart( pObj ){
         console.log( "Click Start" )
+        pObj.isClick = true
         pObj.gameSocket.startGame()
         
     }
@@ -180,6 +209,17 @@ export class GameMain extends PIXI.Container{
         //console.log( diffX )
         //console.log( parent )
 
+        parent.deviceControl.leftArr.scale.set(0.5)
+        parent.deviceControl.rightArr.scale.set(0.5)
+
+        if( diffX < 0 ){
+            parent.deviceControl.leftArr.scale.set(1.0)
+        }
+
+        if( diffX > 0 ){
+            parent.deviceControl.rightArr.scale.set(1.0)
+        }
+
         parent.ball.update( diffX )
 
 
@@ -195,6 +235,39 @@ export class GameMain extends PIXI.Container{
 
     updateGame(deltaTime){
 
+        if(this.isClick){
+            if( this.phase == "START" ){
+            
+                if( this.isFever ){
+                    this.feverSp.visible = true
+                }else{
+                    this.feverSp.visible = false
+                }
+    
+                
+                this.deviceControl.leftArr.visible = true
+                this.deviceControl.rightArr.visible = true
+            
+            }else if( this.phase == "READY" ){
+    
+                this.feverSp.visible = false
+                this.deviceControl.leftArr.visible = false
+                this.deviceControl.rightArr.visible = false
+    
+            }else if( this.phase == "END" ){
+    
+                this.feverSp.visible = false
+                this.deviceControl.leftArr.visible = false
+                this.deviceControl.rightArr.visible = false
+    
+            }
+            
+        }else{
+            this.feverSp.visible = false
+            this.deviceControl.leftArr.visible = false
+            this.deviceControl.rightArr.visible = false
+        }
+        
     }
 
     initObj(){
