@@ -59,7 +59,7 @@ class PixiMain {
         const rendererOptions = {
             width: this.App_Width,
             height: this.App_Height,
-            antialias: true,
+            antialias: false,
             resolution: 1,
             resizeTo: this.canvasContainer,
             backgroundColor: 0x000000
@@ -67,8 +67,8 @@ class PixiMain {
 
         this.app = new PIXI.Application(rendererOptions);
 
-        PIXI.settings.ROUND_PIXELS = true
-        PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.LINEAR
+        //PIXI.settings.ROUND_PIXELS = true
+        //PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.LINEAR
 
         this.stage = this.app.stage
 

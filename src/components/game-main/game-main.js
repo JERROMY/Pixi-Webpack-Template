@@ -422,6 +422,7 @@ export class GameMain extends PIXI.Container{
         this.isReward = false
         this.isFever = false
         this.score = 0
+        this.gameScore.setGameScore( this.score )
         this.eneTickCount = 0
         this.recoverEffect()
 
