@@ -2,6 +2,7 @@
 import * as PIXI from 'pixi.js'
 import AssetsLoader from '../../assetsLoader'
 import gsap from "gsap"
+import { GameMain } from '../game-main/game-main'
 
 
 class PixiMain {
@@ -105,12 +106,12 @@ class PixiMain {
 
         // Sprite Usage Example
         console.log("Loaded Finish 2");
-        let tween = gsap.to(this.loadingTxt, {alpha: 0, duration: 0.8, delay:0, ease: "circ.in", onComplete: this.onPercentageTxtFadeOut, onCompleteParams: [ this.loadingTxt ]})
+        let tween = gsap.to(this.loadingTxt, {alpha: 0, duration: 0.8, delay:0, ease: "circ.in", onComplete: this.onPercentageTxtFadeOut, onCompleteParams: [ this.loadingTxt, this ]})
       
-        // let sprite = new PIXI.Sprite(resources.ball.texture);
-        // stage.addChild(sprite);
-        // let bgTex = resources["hBg"+(i+1)].texture;
-        // let bgSp = new PIXI.Sprite(bgTex);
+        // let sprite = new PIXI.Sprite(resources.ball.texture)
+        // stage.addChild(sprite)
+        // let bgTex = resources["hBg"+(i+1)].texture
+        // let bgSp = new PIXI.Sprite(bgTex)
       
         
       
@@ -118,12 +119,26 @@ class PixiMain {
       
     }
 
-    onPercentageTxtFadeOut( obj ){
+    onPercentageTxtFadeOut( obj, p ){
         obj.visible = false
         //this.assetsLoader.isLoadingReady = true;
-        console.log("Loading Complete!");
+        console.log("Loading Complete!")
       
-        //initGameObj();
+        p.initGameObj();
+    }
+
+    initGameObj(){
+        
+        // console.log( 'init Game Object' )
+        const game1 = new GameMain( this.assetsLoader.resources )
+        this.stage.addChild( game1 )
+
+
+        this.gameStages.push( game1 )
+
+        this.resizeGame()
+
+
     }
 
     animate(delta) {
@@ -195,7 +210,7 @@ class PixiMain {
           totalGameW += spaceTotal
       
           for(let i = 0 ; i < gameStageCount ; i++){
-            const gameStage = gameStages[i]
+            const gameStage = this.gameStages[i]
             gameStage.position.x -= totalGameW/2
             gameStage.initObj()
             //gameStage.startCountReady();
